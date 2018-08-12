@@ -1,0 +1,86 @@
+## Load Balancer
+
+Nginx proxy app which reads a data source and generates a new nginx conf for each service
+
+One file is read.
+
+This is placed in `/etc/gomplate/data/apps.json`
+
+They can be overridden with envs:
+
+- APPS_CONFIG_JSON
+
+This lb assumes the docker swarm mode internal load balancing system where a service has 
+1 public port spread across every machine in cluster.
+
+
+- APPS Config looks like this:
+```
+ {
+    "defaultBaseUrl": "local.foo.bar",
+    "workerConnections": 1024, # default is 1024 if not supplied
+    "proxyReadTimeout": 120, # default is 120 if not supplied
+    "proxySendTimeout": 120, # default is 120 if not supplied
+    "sendTimeout": 120, # default is 120 if not supplied
+    "readTimeout": 120, # default is 120 if not supplied
+    "services": [
+        {
+            "name": "my-service",
+            "subdomains": [
+                {
+                    "name": "www",
+                    "enabled": "true",
+                    "enableClientCerts": false,
+                    "enableSsl": true,
+                    "baseUrl": "local.foo.bar"
+                }
+            ],
+            "upstream": {
+                "port": 9111,
+                "host": "app.upstream.com"
+            }
+        }
+    ]
+}
+```
+
+
+**An app can have multiple subdomains**
+
+`service` options
+
+|Service options      |Required|Default|Description                                      |
+|----------------------------------------------------------------------------------------|
+|`name`               |true    |       |The service name                                 |
+|`subdomains`         |true    |       |The subdomains for the service                   |
+|`upstream`           |true    |       |The upstream settings for the service            |
+
+
+`subdomain` options explained
+
+|Subdomain options    |Required|Default|Description                                      |
+|----------------------------------------------------------------------------------------|
+|`name`               |true    |       |The subdommain                                   |
+|`enabled`            |true    |       |Whether or not the domain is visible             |
+|`enableSsl`          |true    |       |Whether or not to apply ssl server side          |
+|`enableSso`          |false   |false  |Whether or not to shield with single-sign-on     |
+|`enableClientCerts`  |true    |       |Whether or not to require client ssl cert as well|
+|`baseUrl`            |true    |       |Base domain for the sub domain                   |
+|`port`               |false   |443    |The port to listen on publicly for this domain   |
+|`clientMaxBodySize`  |false   |20m    |Max upload body size                             |
+
+
+`upstream` options
+
+|Upstream options      |Required|Default|Description                                     |
+|----------------------------------------------------------------------------------------|
+|`host`                |true    |       |The host to proxy to                            |
+|`port`                |true    |       |The port to proxy to                            |
+
+NOTE: A subdomain of 'www' also will be availabe at 'foo.bar' or whatever the base-url is set to.
+
+## Error Templates
+
+Check the `html_gen` dir for the necessary files.
+Running `make` builds the `html_gen/template.phtml` file and outputs the files to the correct dir.
+

@@ -1,0 +1,37 @@
+{
+    "defaultBaseUrl": "foo.bar",
+    "sslPort": 7099,
+    "services": [
+        { 
+            "name": "some-upstream",
+            "upstream": {
+                "port": 8090,
+                "host": "some.upstream.com"
+            }
+        },
+        {
+            "name": "another-upstream",
+            "subdomains": [
+                {
+                    "name": "sub1",
+                    "enabled": "true",
+                    "enableSsl": true,
+                    "enableClientCerts": false,
+                    "enableSso": true
+                },
+                {
+                    "name": "sub2",
+                    "enabled": "true",
+                    "baseUrl": "foo.bar2",
+                    "enableSsl": true,
+                    "enableClientCerts": false,
+                    "enableSso": true
+                }
+            ],
+            "upstream": {
+                "port": 9000,
+                "host": "another.upstream.com"
+            }
+        }
+    ]
+}

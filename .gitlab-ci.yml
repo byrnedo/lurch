@@ -1,0 +1,32 @@
+image: docker:latest
+      
+variables:
+    DOCKER_DRIVER: overlay2
+
+stages:
+    - build
+
+services: 
+    - docker:dind
+
+before_script:
+    - docker info
+    - apk add --update make
+    - mkdir -p ./ssh
+      # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - echo -e "$SSH_PRIVATE_KEY" > ./ssh/id_rsa
+    - chmod 600 ./ssh/id_rsa
+      # For Docker builds disable host key checking. Be aware that by adding that
+      # you are suspectible to man-in-the-middle attacks.
+      # WARNING: Use this only with the Docker executor, if you use it with shell
+      # you will overwrite your user's SSH config.
+    - echo -e "Host *\n\tStrictHostKeyChecking no\nHost gitlab.com\n\tIdentitiesOnly yes\n\tIdentityFile ~/.ssh/id_rsa\n" > ./ssh/config
+      # HACK since we can't mount ~/.ssh for some reason
+      # login to private reg
+    - docker login -u byrnedo -p $REGISTRY_PASS
+
+build_image:
+  stage: build
+  script:
+    - make build
+    - make push
