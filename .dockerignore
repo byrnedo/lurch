@@ -1,7 +1,2 @@
 /html_gen/
-certs/*/*.*
-!certs/*/server.crt
-!certs/*/server.key
-certs/*/client/*.*
-!certs/*/client/ca.crt
 
