@@ -1,4 +1,4 @@
-## Load Balancer
+## Openresty Proxy
 
 Nginx proxy app which reads a data source and generates a new nginx conf for each service
 
