@@ -1,0 +1,34 @@
+{
+    "defaultBaseUrl": "foo.bar",
+    "sslPort": 7099,
+    "authRequestUpstream": "https://auth.com",
+    "authRequestRedirect": "https://login.com",
+    "authRequestCookie": "mycookie",
+    "services": [
+        {
+            "name": "another-upstream",
+            "subdomains": [
+                {
+                    "name": "www",
+                    "enabled": "true",
+                    "baseUrl": "foo.bar",
+                    "enableSsl": true,
+                    "enableClientCerts": false,
+                    "enableSso": false
+                },
+                {
+                    "name": "www",
+                    "enabled": "true",
+                    "baseUrl": "foo.bar2",
+                    "enableSsl": true,
+                    "enableClientCerts": false,
+                    "enableSso": false
+                }
+            ],
+            "upstream": {
+                "port": 80,
+                "host": "httpbin.org"
+            }
+        }
+    ]
+}

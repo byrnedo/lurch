@@ -17,11 +17,16 @@ file:
     #linked-to: /dev/stderr
     #filetype: symlink
     #contains: []
-package:
-  nginx:
-    installed: true
-    versions:
-    - 1.11.10-1~jessie
+command:
+  openresty -v:
+    # required attributes
+    exit-status: 0
+    # optional attributes
+    stderr:
+    - "openresty/1.11.2.4"
+    stdout: []
+    timeout: 1000 # in milliseconds
+
 port:
   tcp:80:
     listening: true
@@ -31,13 +36,43 @@ port:
     listening: true
     ip:
     - 0.0.0.0
+
 process:
-  nginx:
+  openresty:
     running: true
+
 http:
   http://localhost:
-    status: 200
-    allow-insecure: false
+    status: 404
+    allow-insecure: true
+    no-follow-redirects: false
+    timeout: 5000
+    body: []
+
+  http://foo.bar:
+    status: 503
+    allow-insecure: true
+    no-follow-redirects: false
+    timeout: 5000
+    body: []
+
+  http://www.foo.bar:
+    status: 503
+    allow-insecure: true
+    no-follow-redirects: false
+    timeout: 5000
+    body: []
+
+  http://foo.bar2:
+    status: 503
+    allow-insecure: true
+    no-follow-redirects: false
+    timeout: 5000
+    body: []
+
+  http://www.foo.bar2:
+    status: 503
+    allow-insecure: true
     no-follow-redirects: false
     timeout: 5000
     body: []
