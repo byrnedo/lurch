@@ -47,6 +47,19 @@ This lb assumes the docker swarm mode internal load balancing system where a ser
 
 **An app can have multiple subdomains**
 
+Top level options
+
+    |Service options      |Required|Default|Description                                      |
+    |----------------------------------------------------------------------------------------|
+    |`defaultBaseUrl`     |true    |       |Base url for not found ssl certs etc             |
+    |`workerConnections`  |false   |   1024|No of worker connections                         |
+    |`proxyReadTimeout`   |false   |    120|Read timeout to upstream                         |
+    |`proxySendTimeout`   |false   |    120|Send timeout to upstream                         |
+    |`sendTimeout`        |false   |    120|Send timeout                                     |
+    |`readTimeout`        |false   |    120|Read timeout                                     |
+    |`authRequestRedirect`|false   |       |Where to redirect to if auth request fails       |
+    |`authRequestUpstream`|false   |       |Where to send auth requests to                   |
+
 `service` options
 
     |Service options      |Required|Default|Description                                      |
@@ -63,6 +76,7 @@ This lb assumes the docker swarm mode internal load balancing system where a ser
     |`name`               |true    |       |The subdommain                                   |
     |`enabled`            |true    |       |Whether or not the domain is visible             |
     |`enableSsl`          |true    |       |Whether or not to apply ssl server side          |
+    |`enableLetsEncrypt`  |false   |false  |Whether or not to apply auto ssl                 |
     |`enableSso`          |false   |false  |Whether or not to shield with single-sign-on     |
     |`enableClientCerts`  |true    |       |Whether or not to require client ssl cert as well|
     |`baseUrl`            |true    |       |Base domain for the sub domain                   |

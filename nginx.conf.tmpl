@@ -26,8 +26,21 @@ server {
     error_page 401 = @error401;
 
 	access_by_lua_block {
-            -- TODO: make dynamic
-            local loginUrl = string.format("https://app.{{.baseUrl}}/login?origin=%s://%s%s", ngx.var.scheme, ngx.var.host, ngx.var.request_uri)
+
+            {{with $apps := datasource "apps"}}
+            local failUrl = "{{$apps.authRequestRedirect}}"
+            {{end}}
+
+            local glue = "?"
+            -- TODO more sophisticated check
+            if string.find(failUrl, "?") then
+                glue = "&"
+            end
+            
+            local urltools = require("url")
+
+            local origin = string.format("%s://%s%s", ngx.var.scheme, ngx.var.host, ngx.var.request_uri)
+            local loginUrl = string.format("%s%sorigin=%s", failUrl, glue, urltools.urlencode(origin))
 			local res = ngx.location.capture("/auth")
 
             local goodStatus = {
@@ -48,12 +61,7 @@ server {
 
         resolver 127.0.0.11 ipv6=off;
         {{with $apps := datasource "apps"}}
-            {{if (has $apps "authRequestUpstream")}}
         set $upstream {{$apps.authRequestUpstream}};
-            {{else}}
-            -- TODO: make dynamic
-        set $upstream https://app.{{.baseUrl}}/api/admin/sso/authorize;
-            {{end}}
         {{end}}
         proxy_pass $upstream;
 
@@ -191,8 +199,6 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
 proxy_set_header X-Request-ID $request_id; # Pass to app server
 
-# TODO - REMOVE THIS HACK BY MAKING THE API ORDERS ASYNC, nobody should have to wait 2 minutes for a 504.
-
 {{if (has $apps "proxyConnectTimeout") }}
 proxy_connect_timeout       {{$apps.proxyConnectTimeout}};
 {{else}}
@@ -222,10 +228,25 @@ init_by_lua_block {
     -- so this must be configured.
     auto_ssl:set("allow_domain", function(domain)
 
-        -- TODO: make dynamic
-        if domain == "app.foo.bar" then
+    {{range $confService := $apps.services}}
+        {{if (has $confService "subdomains")}}
+                        {{range $subdomain := $confService.subdomains}}
+                            {{if (has $subdomain "enableLetsEncrypt)}}
+                                {{if $subdomain.enableLetsEncrypt}}
+
+                                    {{if eq $subdomain.name "www" }}
+        if domain == "{{$subdomain.baseUrl}}" then
             return true
         end
+                                    {{end}} 
+        if domain == "{{$subdomain.name}}.{{$subdomain.baseUrl}}" then
+            return true
+        end
+                                {{end}}
+                            {{end}}
+                        {{end}}
+        {{end}}
+    {{end}}
         return false
 
     end)
@@ -380,6 +401,7 @@ server {
 		  ngx.var.response_body = ngx.ctx.buffered
 		end
 	';
+    # TODO: make this configurable
 	log_by_lua '
 		local ignoreStatus = {
 			["200"]=true,

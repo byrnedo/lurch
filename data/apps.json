@@ -1,6 +1,7 @@
 {
     "defaultBaseUrl": "foo.bar",
     "sslPort": 7099,
+    "authRequestUpstream": "https://somelogin.com",
     "services": [
         { 
             "name": "some-upstream",
