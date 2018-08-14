@@ -59,6 +59,7 @@ Top level options
     |`readTimeout`        |false   |    120|Read timeout                                     |
     |`authRequestRedirect`|false   |       |Where to redirect to if auth request fails       |
     |`authRequestUpstream`|false   |       |Where to send auth requests to                   |
+    |`authRequestCookie`  |false   |       |Name of cookie to take bearer token from         |
 
 `service` options
 
@@ -92,3 +93,11 @@ Top level options
     |`port`                |true    |       |The port to proxy to                            |
 
 NOTE: A subdomain of 'www' also will be availabe at 'foo.bar' or whatever the base-url is set to.
+
+# SSL Defaults
+
+A default certificate needs to be supplied, even when using letsencrypt.
+
+These must be named `server.crt` and placed in `/usr/local/openresty/nginx/ssl/<baseUrl>/`.
+
+So generate a self-signed one for worst case and mount it in :)

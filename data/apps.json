@@ -1,7 +1,9 @@
 {
     "defaultBaseUrl": "foo.bar",
     "sslPort": 7099,
-    "authRequestUpstream": "https://somelogin.com",
+    "authRequestUpstream": "https://auth.com",
+    "authRequestRedirect": "https://login.com",
+    "authRequestCookie": "mycookie",
     "services": [
         { 
             "name": "some-upstream",
@@ -16,6 +18,7 @@
                 {
                     "name": "sub1",
                     "enabled": "true",
+                    "baseUrl": "foo.bar",
                     "enableSsl": true,
                     "enableClientCerts": false,
                     "enableSso": true

@@ -23,13 +23,13 @@ server {
 {{define "enableSSO"}}
     {{if (has . "enableSso")}}
         {{ if .enableSso}}
+
+            {{with $apps := datasource "apps"}}
     error_page 401 = @error401;
 
 	access_by_lua_block {
 
-            {{with $apps := datasource "apps"}}
             local failUrl = "{{$apps.authRequestRedirect}}"
-            {{end}}
 
             local glue = "?"
             -- TODO more sophisticated check
@@ -74,11 +74,12 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        if ($http_cookie ~* "{{$apps.ssoCookieName}}=([^;]+)(?:;|$)") {
+        if ($http_cookie ~* "{{$apps.authRequestCookie}}=([^;]+)(?:;|$)") {
             set $token "Bearer $1";
         }
         proxy_set_header X-SSO-Token $token;
     }
+            {{end}}
         {{end}}
     {{end}}
 {{end}}
@@ -231,7 +232,7 @@ init_by_lua_block {
     {{range $confService := $apps.services}}
         {{if (has $confService "subdomains")}}
                         {{range $subdomain := $confService.subdomains}}
-                            {{if (has $subdomain "enableLetsEncrypt)}}
+                            {{if (has $subdomain "enableLetsEncrypt")}}
                                 {{if $subdomain.enableLetsEncrypt}}
 
                                     {{if eq $subdomain.name "www" }}
@@ -282,32 +283,32 @@ server {
 }
 
 
-server {
-    set $template_root /usr/local/openresty/nginx/lua/templates;
-    server_name _; # This is just an invalid value which will never trigger on a real hostname.
-    listen 443 default_server;
-    access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
-
-    include "/usr/local/openresty/nginx/conf.d/ssl.include";
-
-    ssl_certificate "/usr/local/openresty/nginx/ssl/{{$apps.defaultBaseUrl}}/server.crt";
-    ssl_certificate_key "/usr/local/openresty/nginx/ssl/{{$apps.defaultBaseUrl}}/server.key";
-
-    add_header Strict-Transport-Security "max-age=31536000";
-
-
-    location /assets {
-    root "/usr/local/openresty/nginx/html";
-        try_files $uri $uri/;
-    }
-
-    location / {
-        return 503;
-    }
-    
-    include "/usr/local/openresty/nginx/conf.d/error.include";
-
-}
+#server {
+#    set $template_root /usr/local/openresty/nginx/lua/templates;
+#    server_name _; # This is just an invalid value which will never trigger on a real hostname.
+#    listen 443 default_server;
+#    access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
+#
+#    include "/usr/local/openresty/nginx/conf.d/ssl.include";
+#
+#    ssl_certificate "/usr/local/openresty/nginx/ssl/{{$apps.defaultBaseUrl}}/server.crt";
+#    ssl_certificate_key "/usr/local/openresty/nginx/ssl/{{$apps.defaultBaseUrl}}/server.key";
+#
+#    add_header Strict-Transport-Security "max-age=31536000";
+#
+#
+#    location /assets {
+#    root "/usr/local/openresty/nginx/html";
+#        try_files $uri $uri/;
+#    }
+#
+#    location / {
+#        return 503;
+#    }
+#    
+#    include "/usr/local/openresty/nginx/conf.d/error.include";
+#
+#}
 
 # Internal server running on port 8999 for handling certificate tasks.
 server {
