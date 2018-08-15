@@ -9,19 +9,28 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 #export GOSS_PATH=~/Downloads/goss-linux-amd64 
 function echoH() {
-echo
-echo "########################"
-echo "%%%% $1"
-echo "########################"
-echo
+    echo
+    echo "########################"
+    echo "%%%% $1"
+    echo "########################"
+    echo
+}
+
+function errReport() {
+  local err=$?
+  set +o xtrace
+  echo >&2 "Error in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}. '${BASH_COMMAND}' exited with status $err"
 }
 
 function cleanup(){
+    echoH "Cleaning up"
     set +e
-    docker rm -f echo
-    docker network rm test-openresty-proxy
+    x=$(docker rm -f echo)
+    x=$(docker network rm test-openresty-proxy)
     set -e
 }
+
+trap "{ errReport $LINENO; cleanup; }" ERR
 
 trap "{ cleanup; }" SIGINT SIGTERM
 
@@ -60,4 +69,5 @@ dgoss run --rm -it \
     test
 
 cleanup
-exit 1
+
+exit 0

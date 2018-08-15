@@ -1,13 +1,9 @@
 file:
-  #/var/log/nginx/access.log:
-    #exists: true
-    #mode: "0777"
-    #size: 11
-    #owner: root
-    #group: root
-    #linked-to: /dev/stdout
-    #filetype: symlink
-    #contains: []
+  /usr/local/openresty/nginx/conf/nginx.conf:
+    exists: true
+    mode: "0644"
+    owner: root
+    group: root
   #/var/log/nginx/error.log:
     #exists: true
     #mode: "0777"
