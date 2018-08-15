@@ -27,7 +27,7 @@
             ],
             "upstream": {
                 "port": 80,
-                "host": "httpbin.org"
+                "host": "echo"
             }
         }
     ]

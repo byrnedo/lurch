@@ -3,6 +3,8 @@
 set -euo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
+
+
 #curl -L https://github.com/aelsabbahy/goss/releases/download/v0.3.6/goss-linux-amd64 -o ~/Downloads/goss-linux-amd64
 
 #export GOSS_PATH=~/Downloads/goss-linux-amd64 
@@ -13,6 +15,15 @@ echo "%%%% $1"
 echo "########################"
 echo
 }
+
+function cleanup(){
+    set +e
+    docker rm -f echo
+    docker network rm test-openresty-proxy
+    set -e
+}
+
+trap "{ cleanup; }" SIGINT SIGTERM
 
 set +e
 mkdir -p ./tmp/certs
@@ -35,6 +46,8 @@ APPS_JSON=$(cat ./apps.json)
 echoH "Running Dgoss"
 
 
+ECHO_ID=$(docker run --name echo --network test-openresty-proxy -d hashicorp/http-echo -listen=:80 -text="hello world")
+
 dgoss run --rm -it \
     --network test-openresty-proxy \
     --add-host foo.bar:127.0.0.1 \
@@ -46,4 +59,5 @@ dgoss run --rm -it \
     -v $PWD/tmp/certs/foo.bar2:/usr/local/openresty/nginx/ssl/foo.bar2/ \
     test
 
-
+cleanup
+exit 1

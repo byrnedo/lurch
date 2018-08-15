@@ -50,28 +50,28 @@ http:
     body: []
 
   http://foo.bar:
-    status: 503
+    status: 200
     allow-insecure: true
     no-follow-redirects: false
     timeout: 5000
     body: []
 
   http://www.foo.bar:
-    status: 503
+    status: 200
     allow-insecure: true
     no-follow-redirects: false
     timeout: 5000
     body: []
 
   http://foo.bar2:
-    status: 503
+    status: 200
     allow-insecure: true
     no-follow-redirects: false
     timeout: 5000
     body: []
 
   http://www.foo.bar2:
-    status: 503
+    status: 200
     allow-insecure: true
     no-follow-redirects: false
     timeout: 5000
