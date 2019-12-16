@@ -27,7 +27,7 @@ COPY docker_entrypoint.sh /docker_entrypoint.sh
 RUN mkdir $RESTY_ROOT/nginx/conf.d/
 
 COPY data /etc/gomplate/data
-COPY nginx.conf.tmpl /etc/gomplate/nginx.conf.tmpl
+COPY nginx.conf /etc/gomplate/nginx.conf.tmpl
 
 COPY error.include $RESTY_ROOT/nginx/conf.d/error.include
 COPY ssl.include $RESTY_ROOT/nginx/conf.d/ssl.include

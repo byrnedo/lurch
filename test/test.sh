@@ -30,6 +30,8 @@ function cleanup(){
     set -e
 }
 
+IMAGE_ID=$(cd $DIR/../ && docker build -q .)
+
 trap "{ errReport $LINENO; cleanup; }" ERR
 
 trap "{ cleanup; }" SIGINT SIGTERM
@@ -66,7 +68,7 @@ dgoss run --rm -it \
     -e APPS_CONFIG_JSON="$APPS_JSON" \
     -v $PWD/tmp/certs/foo.bar:/usr/local/openresty/nginx/ssl/foo.bar/ \
     -v $PWD/tmp/certs/foo.bar2:/usr/local/openresty/nginx/ssl/foo.bar2/ \
-    test
+    $IMAGE_ID
 
 cleanup
 

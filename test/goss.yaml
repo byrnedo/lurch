@@ -4,15 +4,6 @@ file:
     mode: "0644"
     owner: root
     group: root
-  #/var/log/nginx/error.log:
-    #exists: true
-    #mode: "0777"
-    #size: 11
-    #owner: root
-    #group: root
-    #linked-to: /dev/stderr
-    #filetype: symlink
-    #contains: []
 command:
   openresty -v:
     # required attributes
