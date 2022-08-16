@@ -108,7 +108,14 @@ server {
     client_max_body_size {{ . }};
 {{end}}
 
+{{define "_proxyPassLocation"}}
+        resolver 127.0.0.11 ipv6=off;
+        proxy_pass {{(print "http://" .host ":" .port)}};
+        proxy_set_header       Host {{.host}};
+{{end}}
+
 {{define "defaultProxyPass"}}
+
     add_header Strict-Transport-Security "max-age=31536000";
     add_header X-Request-ID $request_id; # Return to client
 
@@ -117,24 +124,17 @@ server {
         log_not_found off;
         access_log off;
         
-        resolver 127.0.0.11 ipv6=off;
-        set $upstream {{.}};
-
-        proxy_pass $upstream;
+        {{template "_proxyPassLocation" .}}
     }
 
     location ~* \.(css|js|htm|html)$ {
         log_not_found on;
         access_log off;
-        resolver 127.0.0.11 ipv6=off;
-        set $upstream {{.}};
-        proxy_pass $upstream;
+        {{template "_proxyPassLocation" .}}
     }
 
     location / {
-        resolver 127.0.0.11 ipv6=off;
-        set $upstream {{.}};
-        proxy_pass $upstream;
+        {{template "_proxyPassLocation" .}}
     }
 {{end}}
 
@@ -333,7 +333,7 @@ server {
                             {{if $subdomain.enabled}}
                                 {{/* if it's the normal 443 then just redirect from 80 to that, HTTPS ALL THE THINGS*/}}
                                 {{if (has $subdomain "port") }}
-                                    {{if $subdomain.port 443 }}
+                                    {{if eq $subdomain.port 443 }}
                                     {{template "httpsRedirect" $subdomain}}
                                     {{end}}
                                 {{else}}
@@ -347,7 +347,7 @@ server {
     
     # create the server based on the service
     server_name {{$subdomain.baseUrl}};
-    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}} http2;
+    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
     access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
 
     location / {
@@ -378,7 +378,7 @@ server {
     
     # create the server based on the service
     server_name {{$subdomain.name}}.{{$subdomain.baseUrl}};
-    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}} http2;
+    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
     access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
 
     {{template "enableSSL" $subdomain}}
@@ -423,7 +423,7 @@ server {
 	';
 
 
-    {{template "defaultProxyPass" (print "http://" $confService.upstream.host ":" $confService.upstream.port)}}
+    {{template "defaultProxyPass" $confService.upstream}}
 
     include "/usr/local/openresty/nginx/conf.d/error.include";
 }
