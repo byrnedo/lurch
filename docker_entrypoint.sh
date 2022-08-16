@@ -9,16 +9,17 @@ app_config="$GOMP_DIR/data/apps.json"
 conf_path="/usr/local/openresty/nginx/conf/nginx.conf"
 
 # If template supplied as env then write the file
-if [ ! -z "$NGINX_TEMPLATE" ]; then
+if [ -n "$NGINX_TEMPLATE" ]; then
     echo "$NGINX_TEMPLATE" > $template
 fi
 
 # If config supplied as env then write the file
-if [ ! -z "$APPS_CONFIG_JSON" ]; then
+if [ -n "$APPS_CONFIG_JSON" ]; then
     echo "$APPS_CONFIG_JSON" > $app_config
 fi
 
 ## Chown storage of ssl certs
+mkdir -p /etc/resty-auto-ssl/storage
 chown -R nobody /etc/resty-auto-ssl/storage
 
 ## Hopefully fix bug

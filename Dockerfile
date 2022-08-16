@@ -1,8 +1,8 @@
-FROM openresty/openresty:1.11.2.4-trusty
+FROM --platform=linux/amd64 openresty/openresty:1.21.4.1-3-jammy
 MAINTAINER Donal Byrne <byrnedo@tcd.ie>
 
 ENV RESTY_AUTO_SSL_VERSION=0.11.1-1
-ENV GOMPLATE_VERSION=v1.9.1
+ENV GOMPLATE_VERSION=v3.11.2
 ENV RESTY_ROOT=/usr/local/openresty
 
 
@@ -14,7 +14,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     unzip && \
     rm -rf /var/lib/apt/lists/* && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-http && \
-    DEBIAN_FRONTENT=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl $RESTY_AUTO_SSL_VERSION && \
+    DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl $RESTY_AUTO_SSL_VERSION && \
     opm get bungle/lua-resty-template && \
     curl -L https://github.com/hairyhenderson/gomplate/releases/download/$GOMPLATE_VERSION/gomplate_linux-amd64 > /tmp/gomplate && \
     mv /tmp/gomplate /usr/local/bin && \
