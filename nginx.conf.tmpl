@@ -114,7 +114,7 @@ server {
         proxy_set_header       Host {{.host}};
 {{end}}
 
-{{define "defaultProxyPass"}}
+{{define "remoteOrigin"}}
 
     add_header Strict-Transport-Security "max-age=31536000";
     add_header X-Request-ID $request_id; # Return to client
@@ -421,7 +421,13 @@ server {
 	';
 
 
-    {{template "defaultProxyPass" $confService.upstream}}
+    {{if eq $confService.origin.type "remote"}}
+      {{template "remoteOrigin" $confService.origin}}
+    {{end}}
+    {{if eq $confService.origin.type "local"}}
+      root {{$confService.origin.root}};
+      try_files $uri $uri/ index.html;
+    {{end}}
 
     include "/usr/local/openresty/nginx/conf.d/error.include";
 }

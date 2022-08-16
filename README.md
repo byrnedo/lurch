@@ -10,11 +10,11 @@ They can be overridden with envs:
 
 - APPS_CONFIG_JSON
 
-This lb assumes the docker swarm mode internal load balancing system where a service has 
+This lb assumes the docker swarm mode internal load balancing system where a service has
 1 public port spread across every machine in cluster.
 
-
 - APPS Config looks like this:
+
 ```
  {
     "defaultBaseUrl": "local.foo.bar",
@@ -35,7 +35,8 @@ This lb assumes the docker swarm mode internal load balancing system where a ser
                     "baseUrl": "local.foo.bar"
                 }
             ],
-            "upstream": {
+            "origin": {
+                "type": "remote",
                 "port": 9111,
                 "host": "app.upstream.com"
             }
@@ -43,7 +44,6 @@ This lb assumes the docker swarm mode internal load balancing system where a ser
     ]
 }
 ```
-
 
 **An app can have multiple subdomains**
 
@@ -69,7 +69,6 @@ Top level options
     |`subdomains`         |true    |       |The subdomains for the service                   |
     |`upstream`           |true    |       |The upstream settings for the service            |
 
-
 `subdomain` options explained
 
     |Subdomain options    |Required|Default|Description                                      |
@@ -84,13 +83,20 @@ Top level options
     |`port`               |false   |443    |The port to listen on publicly for this domain   |
     |`clientMaxBodySize`  |false   |20m    |Max upload body size                             |
 
+`origin` options
 
-`upstream` options
+If `origin.type = "remote"`
 
-    |Upstream options      |Required|Default|Description                                     |
+    |Remote options      |Required|Default|Description                                     |
     |----------------------------------------------------------------------------------------|
     |`host`                |true    |       |The host to proxy to                            |
     |`port`                |true    |       |The port to proxy to                            |
+
+If `origin.type = "local"`
+
+    |Remote options      |Required|Default|Description                                     |
+    |----------------------------------------------------------------------------------------|
+    |`root`                |true    |       |The root dir where the files are hosted                            |
 
 NOTE: A subdomain of 'www' also will be availabe at 'foo.bar' or whatever the base-url is set to.
 
