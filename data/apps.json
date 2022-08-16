@@ -1,40 +1,41 @@
 {
-    "defaultBaseUrl": "foo.bar",
-    "authRequestUpstream": "https://auth.com",
-    "authRequestRedirect": "https://login.com",
-    "authRequestCookie": "mycookie",
-    "services": [
-        { 
-            "name": "some-upstream",
-            "upstream": {
-                "port": 8090,
-                "host": "some.upstream.com"
-            }
+  "defaultBaseUrl": "foo.bar",
+  "authRequestUpstream": "https://auth.com",
+  "authRequestRedirect": "https://login.com",
+  "authRequestCookie": "mycookie",
+  "services": [
+    {
+      "name": "some-upstream",
+      "upstream": {
+        "port": 8090,
+        "host": "some.upstream.com"
+      }
+    },
+    {
+      "name": "another-upstream",
+      "subdomains": [
+        {
+          "name": "sub1",
+          "enabled": "true",
+          "baseUrl": "foo.bar",
+          "enableSsl": true,
+          "enableClientCerts": false,
+          "enableSso": true
         },
         {
-            "name": "another-upstream",
-            "subdomains": [
-                {
-                    "name": "sub1",
-                    "enabled": "true",
-                    "baseUrl": "foo.bar",
-                    "enableSsl": true,
-                    "enableClientCerts": false,
-                    "enableSso": true
-                },
-                {
-                    "name": "sub2",
-                    "enabled": "true",
-                    "baseUrl": "foo.bar2",
-                    "enableSsl": true,
-                    "enableClientCerts": false,
-                    "enableSso": true
-                }
-            ],
-            "upstream": {
-                "port": 9000,
-                "host": "another.upstream.com"
-            }
+          "name": "sub2",
+          "enabled": "true",
+          "baseUrl": "foo.bar2",
+          "enableSsl": true,
+          "enableClientCerts": false,
+          "enableSso": true
         }
-    ]
+      ],
+      "origin": {
+        "type": "remote",
+        "port": 9000,
+        "host": "another.upstream.com"
+      }
+    }
+  ]
 }
