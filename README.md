@@ -98,7 +98,7 @@ If `origin.type = "local"`
     |----------------------------------------------------------------------------------------|
     |`root`                |true    |       |The root dir where the files are hosted                            |
 
-NOTE: A subdomain of 'www' also will be availabe at 'foo.bar' or whatever the base-url is set to.
+NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the base-url is set to.
 
 # SSL Defaults
 
