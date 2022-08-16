@@ -1,6 +1,0 @@
-error_page 502 503 504 404 @error; 
-location @error {
-    default_type "text/html";
-    content_by_lua_block { require("error_page").go(ngx.status) }
-}
-

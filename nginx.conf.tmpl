@@ -1,5 +1,12 @@
+{{define "errorPages"}}
+    error_page 502 503 504 404 @error;
+    location @error {
+    default_type "text/html";
+    content_by_lua_block { require("error_page").go(ngx.status) }
+    }
+{{end}}
 {{define "httpsRedirect"}}
-server {
+    server {
     set $template_root /usr/local/openresty/nginx/lua/templates;
     # create the server based on the service
     server_name {{.name}}.{{.baseUrl}} {{if eq .name "www" }}{{.baseUrl}}{{end}};
@@ -7,98 +14,108 @@ server {
 
     access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
     location / {
-        return 301 https://$host$request_uri;
+    return 301 https://$host$request_uri;
     }
 
     location /.well-known/acme-challenge/ {
-      content_by_lua_block {
-        auto_ssl:challenge_server()
-      }
+    content_by_lua_block {
+    auto_ssl:challenge_server()
+    }
     }
 
-    include "/usr/local/openresty/nginx/conf.d/error.include";
-}
+    {{template "errorPages"}}
+    }
 {{end}}
+
 
 {{define "enableSSO"}}
     {{if (has . "enableSso")}}
         {{ if .enableSso}}
 
             {{with $apps := datasource "apps"}}
-    error_page 401 = @error401;
+                error_page 401 = @error401;
 
-	access_by_lua_block {
+                access_by_lua_block {
 
-            local failUrl = "{{$apps.authRequestRedirect}}"
+                local failUrl = "{{$apps.authRequestRedirect}}"
 
-            local glue = "?"
-            -- TODO more sophisticated check
-            if string.find(failUrl, "?") then
+                local glue = "?"
+                -- TODO more sophisticated check
+                if string.find(failUrl, "?") then
                 glue = "&"
-            end
-            
-            local urltools = require("url")
+                end
 
-            local origin = string.format("%s://%s%s", ngx.var.scheme, ngx.var.host, ngx.var.request_uri)
-            local loginUrl = string.format("%s%sorigin=%s", failUrl, glue, urltools.urlencode(origin))
-			local res = ngx.location.capture("/auth")
+                local urltools = require("url")
 
-            local goodStatus = {
+                local origin = string.format("%s://%s%s", ngx.var.scheme, ngx.var.host, ngx.var.request_uri)
+                local loginUrl = string.format("%s%sorigin=%s", failUrl, glue, urltools.urlencode(origin))
+                local res = ngx.location.capture("/auth")
+
+                local goodStatus = {
                 [200]=true,
                 [201]=true,
                 [204]=true
-            }
+                }
 
-            if goodStatus[res.status] ~= true then
+                if goodStatus[res.status] ~= true then
                 return ngx.redirect(loginUrl)
-            end
+                end
 
-            -- tests passed
-        }
+                -- tests passed
+                }
 
-    location = /auth {
-        internal;
+                location = /auth {
+                internal;
 
-        resolver 127.0.0.11 ipv6=off;
-        {{with $apps := datasource "apps"}}
-        set $upstream {{$apps.authRequestUpstream}};
-        {{end}}
-        proxy_pass $upstream;
+                resolver 127.0.0.11 ipv6=off;
+                {{with $apps := datasource "apps"}}
+                    set $upstream {{$apps.authRequestUpstream}};
+                {{end}}
+                proxy_pass $upstream;
 
-        proxy_pass_request_body     off;
+                proxy_pass_request_body     off;
 
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Original-URI $request_uri;
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header Content-Length "";
+                proxy_set_header X-Original-URI $request_uri;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
 
-        if ($http_cookie ~* "{{$apps.authRequestCookie}}=([^;]+)(?:;|$)") {
-            set $token "Bearer $1";
-        }
-        proxy_set_header X-SSO-Token $token;
-    }
+                if ($http_cookie ~* "{{$apps.authRequestCookie}}=([^;]+)(?:;|$)") {
+                set $token "Bearer $1";
+                }
+                proxy_set_header X-SSO-Token $token;
+                }
             {{end}}
         {{end}}
     {{end}}
+{{end}}
+
+{{define "sslSettings"}}
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA;
+
+    ssl_prefer_server_ciphers on;
+    ssl_session_timeout 5m;
+    ssl_session_cache shared:SSL:50m;
 {{end}}
 
 {{define "enableSSL"}}
     {{if (has . "enableSsl")}}
         {{ if .enableSsl}}
 
-			ssl_certificate_by_lua_block {
-			  auto_ssl:ssl_certificate()
-			}
-            include "/usr/local/openresty/nginx/conf.d/ssl.include";
+            ssl_certificate_by_lua_block {
+            auto_ssl:ssl_certificate()
+            }
+            {{template "sslSettings"}}
             ssl_certificate "/usr/local/openresty/nginx/ssl/{{.baseUrl}}/server.crt";
             ssl_certificate_key "/usr/local/openresty/nginx/ssl/{{.baseUrl}}/server.key";
-        {{/*Turn on client ssl??*/}}
+            {{/*Turn on client ssl??*/}}
             {{if .enableClientCerts }}
                 ssl_client_certificate "/usr/local/openresty/nginx/ssl/{{.baseUrl}}/client/ca.crt";
-    ssl_verify_client on;
-    ssl_verify_depth 2;
+                ssl_verify_client on;
+                ssl_verify_depth 2;
             {{end}}
         {{end}}
     {{end}}
@@ -109,117 +126,112 @@ server {
 {{end}}
 
 {{define "_proxyPassLocation"}}
-        resolver 127.0.0.11 ipv6=off;
-        proxy_pass {{(print "http://" .host ":" .port)}};
-        proxy_set_header       Host {{.host}};
+    resolver 127.0.0.11 ipv6=off;
+    proxy_pass {{(print "http://" .host ":" .port)}};
+    proxy_set_header       Host {{.host}};
 {{end}}
 
 {{define "remoteOrigin"}}
 
+    # TODO: yes?
     add_header Strict-Transport-Security "max-age=31536000";
     add_header X-Request-ID $request_id; # Return to client
 
     location ~* \.(ogg|ogv|svgz|mp4|rss|atom|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|mid|midi|wav|bmp|eot|oft|svg|ttf|woff)$ {
-        
-        log_not_found off;
-        access_log off;
-        
-        {{template "_proxyPassLocation" .}}
+
+    log_not_found off;
+    access_log off;
+
+    {{template "_proxyPassLocation" .}}
     }
 
     location ~* \.(css|js|htm|html)$ {
-        log_not_found on;
-        access_log off;
-        {{template "_proxyPassLocation" .}}
+    log_not_found on;
+    access_log off;
+    {{template "_proxyPassLocation" .}}
     }
 
     location / {
-        {{template "_proxyPassLocation" .}}
+    {{template "_proxyPassLocation" .}}
     }
 {{end}}
 
 
 {{with $apps := datasource "apps"}}
 
-events {
+    events {
+    worker_connections  {{if (has $apps "workerConnections") }}{{$apps.workerConnections}}{{else}}1024{{end}};
+    }
 
-    {{if (has $apps "workerConnections") }}
-    worker_connections  {{$apps.workerConnections}};
+
+    http {
+    # The "auto_ssl" shared dict should be defined with enough storage space to
+    # hold your certificate data. 1MB of storage holds certificates for
+    # approximately 100 separate domains.
+    lua_shared_dict auto_ssl 1m;
+    # The "auto_ssl" shared dict is used to temporarily store various settings
+    # like the secret used by the hook server on port 8999. Do not change or
+    # omit it.
+    lua_shared_dict auto_ssl_settings 1m;
+
+    lua_package_path "$prefix/lua/?.lua;;";
+
+    # If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
+    # scheme used to connect to this server
+    map $http_x_forwarded_proto $proxy_x_forwarded_proto {
+    default $http_x_forwarded_proto;
+    ''      $scheme;
+    }
+
+    # If we receive Upgrade, set Connection to "upgrade"; otherwise, delete any
+    # Connection header that may have been passed to this server
+    map $http_upgrade $proxy_connection {
+    default upgrade;
+    '' close;
+    }
+
+    gzip_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+
+    log_format vhost escape=json '{"timestamp": "$time_iso8601","remote_addr":"$remote_addr","message":"[$status] $request_method $request_uri","method": "$request_method","status": $status,"sent_length":$body_bytes_sent,"duration_s":$request_time,"referrer":"$http_referer","user_agent":"$http_user_agent","level": "info","proto": "$server_protocol","url": "$request_uri"}';
+
+
+    resolver 127.0.0.11 ipv6=off;
+
+
+    # HTTP 1.1 support
+    proxy_http_version 1.1;
+    proxy_buffering off;
+    proxy_set_header Host $http_host;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $proxy_connection;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+    proxy_set_header X-Request-ID $request_id; # Pass to app server
+
+    {{if (has $apps "proxyConnectTimeout") }}
+        proxy_connect_timeout       {{$apps.proxyConnectTimeout}};
     {{else}}
-    worker_connections  1024;  ## Default: 1024
+        proxy_connect_timeout       120;
     {{end}}
-}
+    {{if (has $apps "proxySendTimeout") }}
+        proxy_send_timeout          {{$apps.proxySendTimeout}};
+    {{else}}
+        proxy_send_timeout          120;
+    {{end}}
+    {{if (has $apps "proxyReadTimeout") }}
+        proxy_read_timeout          {{$apps.proxyReadTimeout}};
+    {{else}}
+        proxy_read_timeout          120;
+    {{end}}
+    {{if (has $apps "sendTimeout") }}
+        send_timeout                {{$apps.sendTimeout}};
+    {{else}}
+        send_timeout                120;
+    {{end}}
 
-
-http {
-
-# The "auto_ssl" shared dict should be defined with enough storage space to
-# hold your certificate data. 1MB of storage holds certificates for
-# approximately 100 separate domains.
-lua_shared_dict auto_ssl 1m;
-# The "auto_ssl" shared dict is used to temporarily store various settings
-# like the secret used by the hook server on port 8999. Do not change or
-# omit it.
-lua_shared_dict auto_ssl_settings 1m;
-
-lua_package_path "$prefix/lua/?.lua;;";
-
-# If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
-# scheme used to connect to this server
-map $http_x_forwarded_proto $proxy_x_forwarded_proto {
-  default $http_x_forwarded_proto;
-  ''      $scheme;
-}
-
-# If we receive Upgrade, set Connection to "upgrade"; otherwise, delete any
-# Connection header that may have been passed to this server
-map $http_upgrade $proxy_connection {
-  default upgrade;
-  '' close;
-}
-
-gzip_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
-
-
-log_format vhost escape=json '{"timestamp": "$time_iso8601","remote_addr":"$remote_addr","message":"[$status] $request_method $request_uri","method": "$request_method","status": $status,"sent_length":$body_bytes_sent,"duration_s":$request_time,"referrer":"$http_referer","user_agent":"$http_user_agent","level": "info","proto": "$server_protocol","url": "$request_uri"}';
-
-
-resolver 127.0.0.11 ipv6=off;
-
-
-# HTTP 1.1 support
-proxy_http_version 1.1;
-proxy_buffering off;
-proxy_set_header Host $http_host;
-proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection $proxy_connection;
-proxy_set_header X-Real-IP $remote_addr;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
-proxy_set_header X-Request-ID $request_id; # Pass to app server
-
-{{if (has $apps "proxyConnectTimeout") }}
-proxy_connect_timeout       {{$apps.proxyConnectTimeout}};
-{{else}}
-proxy_connect_timeout       120;
-{{end}}
-{{if (has $apps "proxySendTimeout") }}
-proxy_send_timeout          {{$apps.proxySendTimeout}};
-{{else}}
-proxy_send_timeout          120;
-{{end}}
-{{if (has $apps "proxyReadTimeout") }}
-proxy_read_timeout          {{$apps.proxyReadTimeout}};
-{{else}}
-proxy_read_timeout          120;
-{{end}}
-{{if (has $apps "sendTimeout") }}
-send_timeout                {{$apps.sendTimeout}};
-{{else}}
-send_timeout                120;
-{{end}}
-
-init_by_lua_block {
+    init_by_lua_block {
     auto_ssl = (require "resty.auto-ssl").new()
 
     -- Define a function to determine which SNI domains to automatically handle
@@ -229,87 +241,60 @@ init_by_lua_block {
 
     {{range $confService := $apps.services}}
         {{if (has $confService "subdomains")}}
-                        {{range $subdomain := $confService.subdomains}}
-                            {{if (has $subdomain "enableLetsEncrypt")}}
-                                {{if $subdomain.enableLetsEncrypt}}
+            {{range $subdomain := $confService.subdomains}}
+                {{if (has $subdomain "enableLetsEncrypt")}}
+                    {{if $subdomain.enableLetsEncrypt}}
 
-                                    {{if eq $subdomain.name "www" }}
-        if domain == "{{$subdomain.baseUrl}}" then
-            return true
-        end
-                                    {{end}} 
-        if domain == "{{$subdomain.name}}.{{$subdomain.baseUrl}}" then
-            return true
-        end
-                                {{end}}
-                            {{end}}
+                        {{if eq $subdomain.name "www" }}
+                            if domain == "{{$subdomain.baseUrl}}" then
+                            return true
+                            end
                         {{end}}
+                        if domain == "{{$subdomain.name}}.{{$subdomain.baseUrl}}" then
+                        return true
+                        end
+                    {{end}}
+                {{end}}
+            {{end}}
         {{end}}
     {{end}}
-        return false
+    return false
 
     end)
 
     auto_ssl:init()
-}
+    }
 
 
-init_worker_by_lua_block {
+    init_worker_by_lua_block {
     auto_ssl:init_worker()
-}
+    }
 
-server {
+    server {
     set $template_root /usr/local/openresty/nginx/lua/templates;
     server_name _; # This is just an invalid value which will never trigger on a real hostname.
     listen 80;
     access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
 
-	# Endpoint used for performing domain verification with Let's Encrypt.
+    # Endpoint used for performing domain verification with Let's Encrypt.
 
     location /assets {
     root "/usr/local/openresty/nginx/html";
-        try_files $uri $uri/;
+    try_files $uri $uri/;
     }
 
 
     location / {
-        return 404;
+    return 404;
     }
 
-    include "/usr/local/openresty/nginx/conf.d/error.include";
+    {{template "errorPages"}}
 
-}
+    }
 
 
-#server {
-#    set $template_root /usr/local/openresty/nginx/lua/templates;
-#    server_name _; # This is just an invalid value which will never trigger on a real hostname.
-#    listen 443 default_server;
-#    access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
-#
-#    include "/usr/local/openresty/nginx/conf.d/ssl.include";
-#
-#    ssl_certificate "/usr/local/openresty/nginx/ssl/{{$apps.defaultBaseUrl}}/server.crt";
-#    ssl_certificate_key "/usr/local/openresty/nginx/ssl/{{$apps.defaultBaseUrl}}/server.key";
-#
-#    add_header Strict-Transport-Security "max-age=31536000";
-#
-#
-#    location /assets {
-#    root "/usr/local/openresty/nginx/html";
-#        try_files $uri $uri/;
-#    }
-#
-#    location / {
-#        return 503;
-#    }
-#    
-#    include "/usr/local/openresty/nginx/conf.d/error.include";
-#
-#}
-
-# Internal server running on port 8999 for handling certificate tasks.
-server {
+    # Internal server running on port 8999 for handling certificate tasks.
+    server {
     listen 127.0.0.1:8999;
 
     # Increase the body buffer size, to ensure the internal POSTs can always
@@ -318,122 +303,120 @@ server {
     client_max_body_size 128k;
 
     location / {
-      content_by_lua_block {
-        auto_ssl:hook_server()
-      }
+    content_by_lua_block {
+    auto_ssl:hook_server()
     }
-}
+    }
+    }
 
 
     {{range $confService := $apps.services}}
         {{if (has $confService "subdomains")}}
-                        {{range $subdomain := $confService.subdomains}}
-                            {{if $subdomain.enabled}}
-                                {{/* if it's the normal 443 then just redirect from 80 to that, HTTPS ALL THE THINGS*/}}
-                                {{if (has $subdomain "port") }}
-                                    {{if eq $subdomain.port 443 }}
-                                    {{template "httpsRedirect" $subdomain}}
-                                    {{end}}
-                                {{else}}
-                                    {{/* default if no port is given is that it's https*/}}
-                                    {{template "httpsRedirect" $subdomain}}
-                                {{end}}
-                                {{if eq $subdomain.name "www" }}
-
-server {
-    set $template_root /usr/local/openresty/nginx/lua/templates;
-    
-    # create the server based on the service
-    server_name {{$subdomain.baseUrl}};
-    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
-    access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
-
-    location / {
-        return 301 https://www.$host$request_uri;
-    }
-
-    location /.well-known/acme-challenge/ {
-      content_by_lua_block {
-        auto_ssl:challenge_server()
-      }
-    }
-
-    {{template "enableSSL" $subdomain}}
-
-    {{template "enableSSO" $subdomain}}
-
-    {{if (has $subdomain "clientMaxBodySize")}}
-    {{template "enableMaxBody" $subdomain.clientMaxBodySize}}
-    {{else}}
-    {{template "enableMaxBody" "20m"}}
-    {{end}}
-
-    include "/usr/local/openresty/nginx/conf.d/error.include";
-}
-                                {{end}}
-server {
-    set $template_root /usr/local/openresty/nginx/lua/templates;
-    
-    # create the server based on the service
-    server_name {{$subdomain.name}}.{{$subdomain.baseUrl}};
-    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
-    access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
-
-    {{template "enableSSL" $subdomain}}
-
-    {{template "enableSSO" $subdomain}}
-
-    {{if (has $subdomain "clientMaxBodySize")}}
-    {{template "enableMaxBody" $subdomain.clientMaxBodySize}}
-    {{else}}
-    {{template "enableMaxBody" "20m"}}
-    {{end}}
-
-	## log error request body and response if certain error codes
-	set $response_body '';  #we must declare variables first, we cannot create vars in lua
-	set $error_request_body '';
-	set $error_response_body '';
-	body_filter_by_lua '
-		local resp_body = string.sub(ngx.arg[1], 1, 1000)  -- arg[1] contains a chunk of response content
-		ngx.ctx.buffered = string.sub((ngx.ctx.buffered or "") .. resp_body, 1, 1000)
-		if ngx.arg[2] then  -- arg[2] is true if this is the last chunk
-		  ngx.var.response_body = ngx.ctx.buffered
-		end
-	';
-    # TODO: make this configurable
-	log_by_lua '
-		local ignoreStatus = {
-			["200"]=true,
-			["201"]=true,
-			["204"]=true,
-			["301"]=true,
-			["302"]=true,
-			["422"]=true,
-			["403"]=true,
-			["404"]=true,
-			["401"]=true
-		}
-
-		if ignoreStatus[ngx.var.status] ~= true then
-			ngx.var.error_response_body = ngx.var.response_body
-			ngx.var.error_request_body = ngx.var.request_body
-		end
-	';
-
-
-    {{if eq $confService.origin.type "remote"}}
-      {{template "remoteOrigin" $confService.origin}}
-    {{end}}
-    {{if eq $confService.origin.type "local"}}
-      root {{$confService.origin.root}};
-      try_files $uri $uri/ index.html;
-    {{end}}
-
-    include "/usr/local/openresty/nginx/conf.d/error.include";
-}
-                            {{end}}
+            {{range $subdomain := $confService.subdomains}}
+                {{if $subdomain.enabled}}
+                    {{/* if it's the normal 443 then just redirect from 80 to that, HTTPS ALL THE THINGS*/}}
+                    {{if (has $subdomain "port") }}
+                        {{if eq $subdomain.port 443 }}
+                            {{template "httpsRedirect" $subdomain}}
                         {{end}}
+                    {{else}}
+                        {{/* default if no port is given is that it's https*/}}
+                        {{template "httpsRedirect" $subdomain}}
                     {{end}}
+                    {{if eq $subdomain.name "www" }}
+
+                        server {
+                        set $template_root /usr/local/openresty/nginx/lua/templates;
+
+                        # create the server based on the service
+                        server_name {{$subdomain.baseUrl}};
+                        listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
+                        access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
+
+                        location / {
+                        return 301 https://www.$host$request_uri;
+                        }
+
+                        location /.well-known/acme-challenge/ {
+                        content_by_lua_block {
+                        auto_ssl:challenge_server()
+                        }
+                        }
+
+                        {{template "enableSSL" $subdomain}}
+
+                        {{template "enableSSO" $subdomain}}
+
+                        {{if (has $subdomain "clientMaxBodySize")}}
+                            {{template "enableMaxBody" $subdomain.clientMaxBodySize}}
+                        {{else}}
+                            {{template "enableMaxBody" "20m"}}
+                        {{end}}
+                        {{template "errorPages"}}
+                        }
                     {{end}}
+                    server {
+                    set $template_root /usr/local/openresty/nginx/lua/templates;
+
+                    # create the server based on the service
+                    server_name {{$subdomain.name}}.{{$subdomain.baseUrl}};
+                    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
+                    access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
+
+                    {{template "enableSSL" $subdomain}}
+
+                    {{template "enableSSO" $subdomain}}
+
+                    {{if (has $subdomain "clientMaxBodySize")}}
+                        {{template "enableMaxBody" $subdomain.clientMaxBodySize}}
+                    {{else}}
+                        {{template "enableMaxBody" "20m"}}
                     {{end}}
+
+                    ## log error request body and response if certain error codes
+                    set $response_body '';  #we must declare variables first, we cannot create vars in lua
+                    set $error_request_body '';
+                    set $error_response_body '';
+                    body_filter_by_lua '
+                    local resp_body = string.sub(ngx.arg[1], 1, 1000)  -- arg[1] contains a chunk of response content
+                    ngx.ctx.buffered = string.sub((ngx.ctx.buffered or "") .. resp_body, 1, 1000)
+                    if ngx.arg[2] then  -- arg[2] is true if this is the last chunk
+                    ngx.var.response_body = ngx.ctx.buffered
+                    end
+                    ';
+                    # TODO: make this configurable
+                    log_by_lua '
+                    local ignoreStatus = {
+                    ["200"]=true,
+                    ["201"]=true,
+                    ["204"]=true,
+                    ["301"]=true,
+                    ["302"]=true,
+                    ["422"]=true,
+                    ["403"]=true,
+                    ["404"]=true,
+                    ["401"]=true
+                    }
+
+                    if ignoreStatus[ngx.var.status] ~= true then
+                    ngx.var.error_response_body = ngx.var.response_body
+                    ngx.var.error_request_body = ngx.var.request_body
+                    end
+                    ';
+
+
+                    {{if eq $confService.origin.type "remote"}}
+                        {{template "remoteOrigin" $confService.origin}}
+                    {{end}}
+                    {{if eq $confService.origin.type "local"}}
+                        root {{$confService.origin.root}};
+                        try_files $uri $uri/ index.html;
+                    {{end}}
+
+                    }
+                {{end}}
+            {{end}}
+        {{end}}
+    {{end}}
+{{end}}
 }
