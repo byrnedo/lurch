@@ -151,7 +151,9 @@
     root {{$.root}};
     include mime.types;
     try_files $uri $uri/ index.html;
-    {{template "pathRules" .pathRules}}
+    {{if has . "pathRules"}}
+        {{template "pathRules" .pathRules}}
+    {{end}}
 {{end}}
 
 {{define "remoteOrigin"}}
