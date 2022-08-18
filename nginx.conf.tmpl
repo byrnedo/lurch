@@ -130,6 +130,11 @@
     proxy_pass {{(print "http://" .host ":" .port)}};
     proxy_set_header       Host {{.host}};
 {{end}}
+{{define "localOrigin"}}
+    root {{$.root}};
+    include mime.types;
+    try_files $uri $uri/ index.html;
+{{end}}
 
 {{define "remoteOrigin"}}
 
@@ -409,8 +414,7 @@
                         {{template "remoteOrigin" $confService.origin}}
                     {{end}}
                     {{if eq $confService.origin.type "local"}}
-                        root {{$confService.origin.root}};
-                        try_files $uri $uri/ index.html;
+                        {{template "localOrigin" $confService.origin}}
                     {{end}}
 
                     }
