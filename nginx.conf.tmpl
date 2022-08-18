@@ -130,10 +130,28 @@
     proxy_pass {{(print "http://" .host ":" .port)}};
     proxy_set_header       Host {{.host}};
 {{end}}
+
+{{define "pathRules"}}
+    {{range $rule :=  .}}
+        {{if eq $rule.type "prefix"}}
+            location ^~ {{$rule.path}} {
+            proxy_redirect          off;
+            proxy_intercept_errors  on;
+            {{if eq $rule.stripPath true}}
+                rewrite ^{{$rule.path}}(.*)$ /$1 break;
+            {{end}}
+            {{template "_proxyPassLocation" .origin}}
+            }
+
+        {{end}}
+    {{end}}
+{{end}}
+
 {{define "localOrigin"}}
     root {{$.root}};
     include mime.types;
     try_files $uri $uri/ index.html;
+    {{template "pathRules" .pathRules}}
 {{end}}
 
 {{define "remoteOrigin"}}
@@ -159,6 +177,8 @@
     location / {
     {{template "_proxyPassLocation" .}}
     }
+
+    {{template "pathRules" .pathRules}}
 {{end}}
 
 
