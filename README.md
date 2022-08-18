@@ -67,7 +67,7 @@ Top level options
     |----------------------------------------------------------------------------------------|
     |`name`               |true    |       |The service name                                 |
     |`subdomains`         |true    |       |The subdomains for the service                   |
-    |`upstream`           |true    |       |The upstream settings for the service            |
+    |`origin`           |true    |       |The origin settings for the service            |
 
 `subdomain` options explained
 
