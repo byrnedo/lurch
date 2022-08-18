@@ -140,7 +140,7 @@
             {{if eq $rule.stripPath true}}
                 rewrite ^{{$rule.path}}(.*)$ /$1 break;
             {{end}}
-            {{template "_proxyPassLocation" .origin}}
+            {{template "_proxyPassLocation" $rule.origin}}
             }
 
         {{end}}
