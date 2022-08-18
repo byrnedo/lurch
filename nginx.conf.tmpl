@@ -127,7 +127,8 @@
 
 {{define "_proxyPassLocation"}}
     resolver 127.0.0.11 ipv6=off;
-    proxy_pass {{(print "http://" .host ":" .port)}};
+    set $upstream {{(print "http://" .host ":" .port)}};
+    proxy_pass $upstream;
     proxy_set_header       Host {{.host}};
 {{end}}
 
@@ -137,10 +138,10 @@
             location ^~ {{$rule.path}} {
             proxy_redirect          off;
             proxy_intercept_errors  on;
+            {{template "_proxyPassLocation" $rule.origin}}
             {{if eq $rule.stripPath true}}
                 rewrite ^{{$rule.path}}(.*)$ /$1 break;
             {{end}}
-            {{template "_proxyPassLocation" $rule.origin}}
             }
 
         {{end}}

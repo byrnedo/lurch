@@ -29,5 +29,9 @@ rm -f auto-ssl-sockproc.pid
 /usr/local/bin/gomplate -d apps=$app_config --file $template --out $conf_path && \
 
 # Test config
-/usr/local/openresty/bin/openresty -c $conf_path -t && \
+if ! /usr/local/openresty/bin/openresty -c $conf_path -t; then
+  cat --number $conf_path
+  exit 1
+fi
+
 exec /usr/local/openresty/bin/openresty -c $conf_path -g "daemon off;"
