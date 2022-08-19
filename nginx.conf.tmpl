@@ -135,12 +135,12 @@
 {{define "pathRules"}}
     {{range $rule :=  .}}
         {{if eq $rule.type "prefix"}}
-            location ^~ {{$rule.path}} {
+            location ^~ {{$rule.path | trimSpace}} {
             proxy_redirect          off;
             proxy_intercept_errors  on;
             {{template "_proxyPassLocation" $rule.origin}}
             {{if eq $rule.stripPath true}}
-                rewrite ^{{$rule.path}}(.*)$ /$1 break;
+                rewrite ^{{$rule.path | trimSpace}}(.*)$ /$1 break;
             {{end}}
             }
 
@@ -151,7 +151,11 @@
 {{define "localOrigin"}}
     root {{$.root}};
     include mime.types;
-    try_files $uri $uri/ index.html;
+    try_files $uri $uri/ index.html {{if has . "fallbacks"}}
+        {{range $fallback := .fallbacks }}
+            {{$fallback | shellQuote}}
+        {{end}}
+    {{end}};
     {{if has . "pathRules"}}
         {{template "pathRules" .pathRules}}
     {{end}}
