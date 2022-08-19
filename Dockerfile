@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 openresty/openresty:1.21.4.1-3-jammy
 MAINTAINER Donal Byrne <byrnedo@tcd.ie>
 
-ENV RESTY_AUTO_SSL_VERSION=0.11.1-1
+ENV RESTY_AUTO_SSL_VERSION=0.13.1
 ENV GOMPLATE_VERSION=v3.11.2
 ENV RESTY_ROOT=/usr/local/openresty
 
@@ -11,7 +11,8 @@ RUN DEBIAN_FRONTEND=noninteractive \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
-    unzip && \
+    unzip \
+    python3 && \
     rm -rf /var/lib/apt/lists/* && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-http && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl $RESTY_AUTO_SSL_VERSION && \
@@ -20,7 +21,9 @@ RUN DEBIAN_FRONTEND=noninteractive \
     mv /tmp/gomplate /usr/local/bin && \
     chmod +x /usr/local/bin/gomplate && \
     mkdir /etc/resty-auto-ssl && \
-    chown nobody /etc/resty-auto-ssl
+    chown nobody /etc/resty-auto-ssl && \
+    curl -L https://raw.githubusercontent.com/slomkowski/nginx-config-formatter/master/nginxfmt.py > /usr/local/bin/nginxfmt && \
+    chmod +x /usr/local/bin/nginxfmt
 
 COPY docker_entrypoint.sh /docker_entrypoint.sh
 

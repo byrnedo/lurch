@@ -1,21 +1,16 @@
 #!/bin/sh
+set -eu
 
 GOMP_DIR=${GOMP_DIR:-/etc/gomplate}
+TEMPLATE_PATH="$GOMP_DIR/nginx.conf.tmpl"
+APP_CONFIG_PATH="$GOMP_DIR/data/apps.json"
+CONF_PATH="/usr/local/openresty/nginx/conf/nginx.conf"
+APPS_CONFIG_JSON=${APPS_CONFIG_JSON:-}
 
-template="$GOMP_DIR/nginx.conf.tmpl"
-
-app_config="$GOMP_DIR/data/apps.json"
-
-conf_path="/usr/local/openresty/nginx/conf/nginx.conf"
-
-# If template supplied as env then write the file
-if [ -n "$NGINX_TEMPLATE" ]; then
-    echo "$NGINX_TEMPLATE" > $template
-fi
 
 # If config supplied as env then write the file
 if [ -n "$APPS_CONFIG_JSON" ]; then
-    echo "$APPS_CONFIG_JSON" > $app_config
+    echo "$APPS_CONFIG_JSON" > "$APP_CONFIG_PATH"
 fi
 
 ## Chown storage of ssl certs
@@ -26,12 +21,14 @@ chown -R nobody /etc/resty-auto-ssl/storage
 rm -f auto-ssl-sockproc.pid
 
 # Template nginx config
-/usr/local/bin/gomplate -d apps=$app_config --file $template --out $conf_path && \
+/usr/local/bin/gomplate -d apps="$APP_CONFIG_PATH" --file "$TEMPLATE_PATH" --out $CONF_PATH
+
+nginxfmt -v $CONF_PATH
 
 # Test config
-if ! /usr/local/openresty/bin/openresty -c $conf_path -t; then
-  cat --number $conf_path
+if ! /usr/local/openresty/bin/openresty -c $CONF_PATH -t; then
+  cat --number $CONF_PATH
   exit 1
 fi
 
-exec /usr/local/openresty/bin/openresty -c $conf_path -g "daemon off;"
+exec /usr/local/openresty/bin/openresty -c $CONF_PATH -g "daemon off;"
