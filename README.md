@@ -1,7 +1,7 @@
-## Openresty Proxy
+## Lurch
 <img src="./lurch.jpg" width="150"/>
 
-Nginx proxy app which reads a data source and generates a new nginx conf for each service
+Openresty proxy which reads a data source and generates a new conf for each service
 
 One file is read.
 
