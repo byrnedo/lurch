@@ -1,5 +1,6 @@
 ## Lurch
-<img src="./lurch.jpg" width="150"/>
+
+<img src="./lurch.jpg" width="150" style="display: block; margin: 0 auto"/>
 
 Openresty proxy which reads a data source and generates a new conf for each service
 
