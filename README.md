@@ -22,31 +22,25 @@ This lb assumes the docker swarm mode internal load balancing system where a ser
 
 ```json
  {
-    "defaultBaseUrl": "local.foo.bar",
-    "workerConnections": 1024, # default is 1024 if not supplied
-    "proxyReadTimeout": 120, # default is 120 if not supplied
-    "proxySendTimeout": 120, # default is 120 if not supplied
-    "sendTimeout": 120, # default is 120 if not supplied
-    "readTimeout": 120, # default is 120 if not supplied
-    "services": [
+  "services": [
+    {
+      "name": "my-service",
+      "subdomains": [
         {
-            "name": "my-service",
-            "subdomains": [
-                {
-                    "name": "www",
-                    "enabled": "true",
-                    "enableClientCerts": false,
-                    "enableSsl": true,
-                    "baseUrl": "local.foo.bar"
-                }
-            ],
-            "origin": {
-                "type": "remote",
-                "port": 9111,
-                "host": "app.upstream.com"
-            }
+          "name": "www",
+          "enabled": "true",
+          "enableClientCerts": false,
+          "enableSsl": true,
+          "baseUrl": "local.foo.bar"
         }
-    ]
+      ],
+      "origin": {
+        "type": "remote",
+        "port": 9111,
+        "host": "app.upstream.com"
+      }
+    }
+  ]
 }
 ```
 
@@ -56,7 +50,6 @@ Top level options
 
     |Service options      |Required|Default|Description                                      |
     |----------------------------------------------------------------------------------------|
-    |`defaultBaseUrl`     |true    |       |Base url for not found ssl certs etc             |
     |`workerConnections`  |false   |   1024|No of worker connections                         |
     |`proxyReadTimeout`   |false   |    120|Read timeout to upstream                         |
     |`proxySendTimeout`   |false   |    120|Send timeout to upstream                         |
@@ -147,8 +140,10 @@ NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the b
 ## Examples
 
 ### Static Site Which Proxies /api to Upstream
-Service object:
+
 ```json
+{
+  "services": [
     {
       "name": "static",
       "subdomains": [
@@ -157,7 +152,7 @@ Service object:
           "enabled": "true",
           "baseUrl": "test.com",
           "enableSsl": false,
-          "port":  80
+          "port": 80
         }
       ],
       "origin": {
@@ -185,6 +180,8 @@ Service object:
         ]
       }
     }
+  ]
+}
 ```
 
 # SSL Defaults
