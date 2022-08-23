@@ -159,6 +159,12 @@
     {{if has . "pathRules"}}
         {{template "pathRules" .pathRules}}
     {{end}}
+
+    {{if has . "errorPages"}}
+        {{range $code, $pageConf := .errorPages}}
+        error_page {{$code}} {{$pageConf.file}};
+        {{end}}
+    {{end}}
 {{end}}
 
 {{define "remoteOrigin"}}
