@@ -144,6 +144,48 @@ Each status code key value is an object with one property `file`.
 
 NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the base-url is set to.
 
+## Examples
+
+### Static Site Which Proxies /api to Upstream
+```json
+    {
+      "name": "static",
+      "subdomains": [
+        {
+          "name": "static",
+          "enabled": "true",
+          "baseUrl": "test.com",
+          "enableSsl": false,
+          "port":  80
+        }
+      ],
+      "origin": {
+        "type": "local",
+        "root": "/data/static/html",
+        "fallbacks": [
+          "/index.html;"
+        ],
+        "errorPages": {
+          "404": {
+            "file": "/404.html"
+          }
+        },
+        "pathRules": [
+          {
+            "type": "prefix",
+            "path": "/api/",
+            "stripPath": true,
+            "origin": {
+              "type": "remote",
+              "host": "backend.web",
+              "port": 80
+            }
+          }
+        ]
+      }
+    }
+```
+
 # SSL Defaults
 
 A default certificate needs to be supplied, even when using letsencrypt.
