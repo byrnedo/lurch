@@ -147,6 +147,7 @@ NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the b
 ## Examples
 
 ### Static Site Which Proxies /api to Upstream
+Service object:
 ```json
     {
       "name": "static",
