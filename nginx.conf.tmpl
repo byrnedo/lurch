@@ -151,11 +151,11 @@
 {{define "localOrigin"}}
     root {{$.root}};
     include mime.types;
-    try_files $uri $uri/ index.html {{if has . "fallbacks"}}
+    try_files $uri $uri/ {{if has . "fallbacks"}}
         {{range $fallback := .fallbacks }}
             {{$fallback | shellQuote}}
         {{end}}
-    {{end}};
+    {{end}} =404;
     {{if has . "pathRules"}}
         {{template "pathRules" .pathRules}}
     {{end}}
