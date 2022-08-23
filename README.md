@@ -20,7 +20,7 @@ This lb assumes the docker swarm mode internal load balancing system where a ser
 
 - APPS Config looks like this:
 
-```
+```json
  {
     "defaultBaseUrl": "local.foo.bar",
     "workerConnections": 1024, # default is 1024 if not supplied
