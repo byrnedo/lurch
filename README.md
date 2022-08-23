@@ -93,15 +93,54 @@ Top level options
 If `origin.type = "remote"`
 
     |Remote options      |Required|Default|Description                                     |
-    |----------------------------------------------------------------------------------------|
-    |`host`                |true    |       |The host to proxy to                            |
-    |`port`                |true    |       |The port to proxy to                            |
+    |--------------------------------------------------------------------------------------|
+    |`host`              |true    |       |The host to proxy to                            |
+    |`port`              |true    |       |The port to proxy to                            |
 
 If `origin.type = "local"`
 
-    |Remote options      |Required|Default|Description                                     |
+    |Local options      |Required|Default|Description                                     |
+    |-------------------------------------------------------------------------------------|
+    |`root`             |true    |       |The root dir where the files are hosted         |  
+    |`errorPages`       |false   |       |Error pages config                              |
+    |`pathRules`        |false   |       |Array of pathRules                              |
+
+`pathRules` options explained
+
+    |Path Rules options    |Required|Default|Description                                     |
     |----------------------------------------------------------------------------------------|
-    |`root`                |true    |       |The root dir where the files are hosted                            |
+    |`type`                |true    |       |One of [ prefix ]                               |
+    |`path`                |true    |       |The url path to apply the rule to               |
+    |`stripPath`           |false   |       |Strip the `path` value when proxying requests   |
+    |`origin`              |true    |       |Origin object                                   |
+
+Example json:
+
+```json
+{
+  "type": "prefix",
+  "path": "/api/",
+  "stripPath": true,
+  "origin": {
+    "type": "remote",
+    "host": "nginx-api.web",
+    "port": 80
+  }
+}
+```
+
+`errorPages` options explained
+
+This is an object where keys are the http status code.
+Each status code key value is an object with one property `file`.
+
+```json
+{
+  "404": {
+    "file": "404.html"
+  }
+}
+```
 
 NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the base-url is set to.
 
