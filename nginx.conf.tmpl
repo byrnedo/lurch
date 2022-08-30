@@ -126,7 +126,7 @@
 {{end}}
 
 {{define "_proxyPassLocation"}}
-    resolver 127.0.0.11 ipv6=off;
+    resolver 127.0.0.11 ipv6=off valid=10s;
     set $upstream {{(print "http://" .host ":" .port)}};
     proxy_pass $upstream;
     proxy_set_header       Host {{.host}};
