@@ -5,7 +5,9 @@
  </p>
 
 
-Openresty proxy which reads a data source and generates a new conf for each service
+Openresty proxy which reads a data source and generates a new conf for each service.
+
+Docker image available on [docker hub](https://hub.docker.com/r/byrnedo/lurch).
 
 One file is read.
 
