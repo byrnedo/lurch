@@ -32,10 +32,6 @@ RUN mkdir $RESTY_ROOT/nginx/conf.d/
 COPY data /etc/gomplate/data
 COPY nginx.conf.tmpl /etc/gomplate/nginx.conf.tmpl
 
-#ADD ./certs $RESTY_ROOT/nginx/ssl
-
-#RUN rm -rf $RESTY_ROOT/nginx/html
-#COPY html $RESTY_ROOT/nginx/html
 COPY lua $RESTY_ROOT/nginx/lua
 
 
