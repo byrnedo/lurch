@@ -5,22 +5,21 @@
  </p>
 
 
-Openresty proxy which reads a data source and generates a new conf for each service.
+Openresty proxy with following features:
+
+- LetsEncrypt HTTPS
+- SSO via nginx auth requests
+- Simple static site hosting (with optional path proxying)
 
 Docker image available on [docker hub](https://hub.docker.com/r/byrnedo/lurch).
 
-One file is read.
+### Config
 
-This is placed in `/etc/gomplate/data/apps.json`
-
-They can be overridden with envs:
+The proxy is configured using a JSON config file at `/etc/gomplate/data/apps.json`. Alternatively the config can be passed directly as env with:
 
 - APPS_CONFIG_JSON
 
-This lb assumes the docker swarm mode internal load balancing system where a service has
-1 public port spread across every machine in cluster.
-
-- APPS Config looks like this:
+The config looks like this:
 
 ```json
  {
