@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 openresty/openresty:1.21.4.1-3-jammy
+FROM --platform=linux/amd64 openresty/openresty:1.21.4.1-6-bullseye-fat
 MAINTAINER Donal Byrne <byrnedo@tcd.ie>
 
 ENV RESTY_AUTO_SSL_VERSION=0.13.1
@@ -10,10 +10,22 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
+    build-essential \
     curl \
     unzip \
+    make \
     python3 && \
     rm -rf /var/lib/apt/lists/* && \
+    curl -L https://luarocks.org/releases/luarocks-2.0.13.tar.gz --output /tmp/luarocks-2.0.13.tar.gz && \
+        cd /tmp && \
+        tar -xzvf luarocks-2.0.13.tar.gz && \
+        cd luarocks-2.0.13/ && \
+        ./configure --prefix=/usr/local/openresty/luajit \
+            --with-lua=/usr/local/openresty/luajit/ \
+            --lua-suffix=jit \
+            --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1 && \
+        make && \
+        make install && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-http && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl $RESTY_AUTO_SSL_VERSION && \
     opm get bungle/lua-resty-template && \
