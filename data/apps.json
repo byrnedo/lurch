@@ -5,36 +5,31 @@
   "authRequestCookie": "mycookie",
   "services": [
     {
-      "name": "some-upstream",
-      "upstream": {
-        "port": 8090,
-        "host": "some.upstream.com"
-      }
-    },
-    {
-      "name": "another-upstream",
+      "name": "an-upstream",
       "subdomains": [
         {
           "name": "sub1",
           "enabled": "true",
           "baseUrl": "foo.bar",
-          "enableSsl": true,
+          "enableSsl": false,
           "enableClientCerts": false,
-          "enableSso": true
+          "enableSso": true,
+          "port": 80
         },
         {
           "name": "sub2",
           "enabled": "true",
           "baseUrl": "foo.bar2",
-          "enableSsl": true,
+          "enableSsl": false,
           "enableClientCerts": false,
-          "enableSso": true
+          "enableSso": false,
+          "port": 80
         }
       ],
       "origin": {
         "type": "remote",
         "port": 9000,
-        "host": "another.upstream.com"
+        "host": "an.upstream.com"
       }
     }
   ]

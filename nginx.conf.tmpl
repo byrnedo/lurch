@@ -190,8 +190,10 @@
     location / {
     {{template "_proxyPassLocation" .}}
     }
+    {{if has . "pathRules"}}
+        {{template "pathRules" .pathRules}}
+    {{end}}
 
-    {{template "pathRules" .pathRules}}
 {{end}}
 
 

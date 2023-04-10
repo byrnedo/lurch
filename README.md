@@ -10,12 +10,20 @@ Openresty proxy with following features:
 - LetsEncrypt HTTPS
 - SSO via nginx auth requests
 - Simple static site hosting (with optional path proxying)
+- Dynamic config updates via Gomplate remote datasources
 
 Docker image available on [docker hub](https://hub.docker.com/r/byrnedo/lurch).
 
 ### Config
 
-The proxy is configured using a JSON config file at `/etc/gomplate/data/apps.json`. Alternatively the config can be passed directly as env with:
+The nginx config is generated from the json structure using [Gomplate.](https://docs.gomplate.ca)
+
+Gomplate supports many kinds of [datasources](https://docs.gomplate.ca/datasources/) ( local file, remote file over
+http, git, you name it!).
+
+By default the proxy expects the json file at `/etc/gomplate/data/apps.json`.
+
+Alternatively the config can be passed directly as env with:
 
 - APPS_CONFIG_JSON
 
@@ -44,6 +52,12 @@ The config looks like this:
   ]
 }
 ```
+
+### Reloading
+
+Sending a SIGHUP to the container will rebuild the template and reload openresty.
+
+### JSON Spec
 
 **An app can have multiple subdomains**
 
@@ -192,3 +206,5 @@ A default certificate needs to be supplied, even when using letsencrypt.
 These must be named `server.crt` and placed in `/usr/local/openresty/nginx/ssl/<baseUrl>/`.
 
 So generate a self-signed one for worst case and mount it in :)
+
+FYI: A `subdomain` with no `port` will default to 443
