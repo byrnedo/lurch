@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+
 GOMP_DIR=${GOMP_DIR:-/etc/gomplate}
 
 # the nginx configuration template
@@ -22,6 +23,18 @@ if [ -n "$APPS_CONFIG_JSON" ]; then
   echo "$APPS_CONFIG_JSON" >"$DEFAULT_APPS_CONFIG_PATH"
 fi
 
+pidfile=/usr/local/openresty/nginx/logs/nginx.pid
+kill_child() {
+  pid="$(cat $pidfile 2>/dev/null || echo '')"
+  if [ -n "${pid:-}" ]; then
+    echo "killing child pid $pid"
+    kill "$pid"
+  fi
+}
+
+trap 'echo kill signal received; kill_child' INT TERM
+
+
 ## Chown storage of ssl certs
 mkdir -p /etc/resty-auto-ssl/storage
 chown -R nobody /etc/resty-auto-ssl/storage
@@ -35,13 +48,16 @@ export SYSTEM_RESOLVER
 # template the nginx config, format it and test it, printing the config to stdout if there's an error
 make_config() {
   # Template nginx config
+  echo "templating..."
   mv $CONF_PATH ${CONF_PATH}.old
   /usr/local/bin/gomplate -d apps="$APPS_CONFIG_PATH" --file "$TEMPLATE_PATH" --out $CONF_PATH
 
   # Format it
+  echo "formatting..."
   nginxfmt -v $CONF_PATH
 
   # Test config
+  echo "testing config..."
   if ! /usr/local/openresty/bin/openresty -c $CONF_PATH -t; then
     cat --number $CONF_PATH
     mv ${CONF_PATH}.old $CONF_PATH
@@ -51,21 +67,31 @@ make_config() {
 
 # hack to wait for pid to appear
 wait_file_changed() {
-  tail -fn0 "$1" | head -n1
+  tail -fn0 "$1" | head -n1 >/dev/null 2>&1
 }
 
-pidfile=/usr/local/openresty/nginx/logs/nginx.pid
+reload_and_wait() {
+  make_config
+  pid="$(cat $pidfile 2>/dev/null || echo '')"
+  if [ -z "${pid:-}" ]; then
+    return
+  fi
+  kill -HUP "$pid"
+  echo "waiting on $pid"
+  wait "$pid"
+}
 
 make_config
 
+echo "staring daemon..."
 /usr/local/openresty/bin/openresty -c $CONF_PATH -g "daemon off;" &
 
-trap 'echo kill signal received; kill "$pid"' INT TERM
-trap 'echo reload signal received!; make_config; kill -HUP $pid; wait "$pid"' HUP
+trap 'echo reload signal received!; reload_and_wait' HUP
 
 echo 'waiting for pid to appear...'
 wait_file_changed $pidfile
-echo 'pid found.'
 pid="$(cat $pidfile)"
+echo "master process pid found ($pid)"
 
+echo "waiting on process"
 wait $pid
