@@ -128,7 +128,7 @@
 {{define "_proxyPassLocation"}}
     set $upstream {{(print "http://" .host ":" .port)}};
     proxy_pass $upstream;
-    {{if not (and (has . "headers") (has .headers "Host"))}}
+    {{if not (and (has . "headers") (or (has .headers "Host") (has .headers "host")))}}
     proxy_set_header       Host {{.host}};
     {{end}}
 
@@ -137,7 +137,6 @@
             proxy_set_header {{$name}} "{{printf "%s" $value}}";
         {{end}}
     {{end}}
-
 {{end}}
 
 {{define "pathRules"}}

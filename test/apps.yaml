@@ -1,0 +1,52 @@
+---
+services:
+  - name: static # serves a static site from fil
+    subdomains:
+      - name: www
+        enabled: 'true'
+        baseUrl: static.com
+        enableSsl: false
+        port: 80
+    origin:
+      type: local
+      root: "/etc/lurch/test/static/"
+
+  - name: remote # serves an upstream remote
+    subdomains:
+      - name: www
+        enabled: 'true'
+        baseUrl: remote.com
+        enableSsl: false
+        port: 80
+    origin:
+      type: remote
+      host: localhost
+      port: 80
+      headers:
+        Host: www.static.com
+
+  - name: static-advanced # serve static but remote on url path
+    subdomains:
+      - name: advanced
+        enabled: 'true'
+        baseUrl: static.com
+        enableSsl: false
+        port: 80
+    origin:
+      type: local
+      root: "/etc/lurch/test/static/"
+      fallbacks:
+        - "/index.html;"
+      errorPages:
+        '404':
+          file: "/404.html"
+      pathRules:
+        - type: prefix
+          path: "/api/"
+          stripPath: true
+          origin:
+            type: remote
+            host: localhost
+            port: 80
+            headers:
+              host: www.static.com
