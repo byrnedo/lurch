@@ -1,11 +1,13 @@
 ---
+authRequestRedirect: "http://www.static.com"
+authRequestUpstream: "http://non.exis.tant"
+authRequestCookie: "sso-cookie"
 services:
   - name: static # serves a static site from fil
     subdomains:
       - name: www
         enabled: 'true'
         baseUrl: static.com
-        enableSsl: false
         port: 80
     origin:
       type: local
@@ -16,7 +18,6 @@ services:
       - name: www
         enabled: 'true'
         baseUrl: remote.com
-        enableSsl: false
         port: 80
     origin:
       type: remote
@@ -30,7 +31,6 @@ services:
       - name: advanced
         enabled: 'true'
         baseUrl: static.com
-        enableSsl: false
         port: 80
     origin:
       type: local
@@ -50,3 +50,17 @@ services:
             port: 80
             headers:
               host: www.static.com
+  - name: sso
+    subdomains:
+      - name: www
+        enabled: true
+        baseUrl: sso.com
+        port: 80
+        enableSso: true
+    origin:
+      type: "remote"
+      host: localhost
+      port: 80
+      headers:
+        host: www.static.com
+

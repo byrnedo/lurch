@@ -67,8 +67,12 @@
                 location = /auth {
                 internal;
 
-                resolver 127.0.0.11 ipv6=off;
                 {{with $apps := datasource "apps"}}
+                    {{if (has $apps "resolver")}}
+                        resolver {{$apps.resolver}} ipv6=off;
+                    {{else}}
+                        resolver {{env.Getenv "SYSTEM_RESOLVER"}} ipv6=off;
+                    {{end}}
                     set $upstream {{$apps.authRequestUpstream}};
                 {{end}}
                 proxy_pass $upstream;
@@ -85,7 +89,7 @@
                 if ($http_cookie ~* "{{$apps.authRequestCookie}}=([^;]+)(?:;|$)") {
                 set $token "Bearer $1";
                 }
-                proxy_set_header X-SSO-Token $token;
+                proxy_set_header Authorization $token;
                 }
             {{end}}
         {{end}}
@@ -129,7 +133,7 @@
     set $upstream {{(print "http://" .host ":" .port)}};
     proxy_pass $upstream;
     {{if not (and (has . "headers") (or (has .headers "Host") (has .headers "host")))}}
-    proxy_set_header       Host {{.host}};
+        proxy_set_header       Host {{.host}};
     {{end}}
 
     {{if has . "headers"}}
@@ -382,7 +386,7 @@
 
                         # create the server based on the service
                         server_name {{$subdomain.baseUrl}};
-                        listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
+                        listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{if (and (has $subdomain "enableSsl") $subdomain.enableSsl)}} ssl{{end}}{{else}}443 ssl{{end}};
                         access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
 
                         location / {
@@ -412,7 +416,7 @@
 
                     # create the server based on the service
                     server_name {{$subdomain.name}}.{{$subdomain.baseUrl}};
-                    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{else}}443{{end}}{{if $subdomain.enableSsl}} ssl{{end}};
+                    listen {{if (has $subdomain "port")}}{{$subdomain.port}}{{if (and (has $subdomain "enableSsl") $subdomain.enableSsl)}} ssl{{end}}{{else}}443 ssl{{end}};
                     access_log "/usr/local/openresty/nginx/logs/access.log" vhost;
 
                     {{template "enableSSL" $subdomain}}
