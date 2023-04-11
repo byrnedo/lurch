@@ -18,6 +18,7 @@ jobs:
         run: docker build . --file Dockerfile --tag byrnedo/lurch:latest
       - name: Run
         run: docker run --rm -d --name test -e APPS_CONFIG_PATH=/etc/lurch/test/apps.yaml -p 8090:80 byrnedo/lurch:latest
+      - run: sleep 5
       - name: Test
         run: docker exec test hurl  --test --glob '/etc/lurch/test/**/*.hurl'
 
