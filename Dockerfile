@@ -3,11 +3,13 @@ MAINTAINER Donal Byrne <byrnedo@tcd.ie>
 
 ENV RESTY_AUTO_SSL_VERSION=0.13.1
 ENV GOMPLATE_VERSION=v3.11.2
+ENV HURL_VERSION=2.0.1
 ENV RESTY_ROOT=/usr/local/openresty
-
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && \
+    curl --location https://github.com/Orange-OpenSource/hurl/releases/download/${HURL_VERSION}/hurl_${HURL_VERSION}_$(dpkg --print-architecture).deb --output "/tmp/hurl.deb" && \
+    DEBIAN_FRONTEND=noninteractive apt install -y /tmp/hurl.deb && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     build-essential \
@@ -29,7 +31,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-http && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl $RESTY_AUTO_SSL_VERSION && \
     opm get bungle/lua-resty-template && \
-    curl -L https://github.com/hairyhenderson/gomplate/releases/download/$GOMPLATE_VERSION/gomplate_linux-amd64 > /tmp/gomplate && \
+    curl -L https://github.com/hairyhenderson/gomplate/releases/download/$GOMPLATE_VERSION/gomplate_linux-$(dpkg --print-architecture) > /tmp/gomplate && \
     mv /tmp/gomplate /usr/local/bin && \
     chmod +x /usr/local/bin/gomplate && \
     mkdir /etc/resty-auto-ssl && \
@@ -43,6 +45,7 @@ RUN mkdir $RESTY_ROOT/nginx/conf.d/
 
 COPY data /etc/gomplate/data
 COPY nginx.conf.tmpl /etc/gomplate/nginx.conf.tmpl
+COPY test /etc/lurch/test
 
 COPY lua $RESTY_ROOT/nginx/lua
 

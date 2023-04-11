@@ -126,10 +126,18 @@
 {{end}}
 
 {{define "_proxyPassLocation"}}
-    resolver 127.0.0.11 ipv6=off valid=10s;
     set $upstream {{(print "http://" .host ":" .port)}};
     proxy_pass $upstream;
+    {{if not (and (has . "headers") (has .headers "Host"))}}
     proxy_set_header       Host {{.host}};
+    {{end}}
+
+    {{if has . "headers"}}
+        {{range $name, $value := .headers}}
+            proxy_set_header {{$name}} "{{printf "%s" $value}}";
+        {{end}}
+    {{end}}
+
 {{end}}
 
 {{define "pathRules"}}
@@ -162,7 +170,7 @@
 
     {{if has . "errorPages"}}
         {{range $code, $pageConf := .errorPages}}
-        error_page {{$code}} {{$pageConf.file}};
+            error_page {{$code}} {{$pageConf.file}};
         {{end}}
     {{end}}
 {{end}}
@@ -233,10 +241,13 @@
     gzip_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
 
 
-    log_format vhost escape=json '{"timestamp": "$time_iso8601","remote_addr":"$remote_addr","message":"[$status] $request_method $request_uri","method": "$request_method","status": $status,"sent_length":$body_bytes_sent,"duration_s":$request_time,"referrer":"$http_referer","user_agent":"$http_user_agent","level": "info","proto": "$server_protocol","url": "$request_uri"}';
+    log_format vhost escape=json '{"timestamp": "$time_iso8601","remote_addr":"$remote_addr","message":"[$status] $request_method $request_uri","method": "$request_method","status": $status,"sent_length":$body_bytes_sent,"duration_s":$request_time,"referrer":"$http_referer","user_agent":"$http_user_agent","level": "info","proto": "$server_protocol","url": "$request_uri", "host": "$host"}';
 
-
-    resolver 127.0.0.11 ipv6=off;
+    {{if (has $apps "resolver")}}
+        resolver {{$apps.resolver}} ipv6=off;
+    {{else}}
+        resolver {{env.Getenv "SYSTEM_RESOLVER"}} ipv6=off;
+    {{end}}
 
 
     # HTTP 1.1 support
@@ -366,6 +377,8 @@
                     {{if eq $subdomain.name "www" }}
 
                         server {
+
+                        # Service: {{$confService.name}}
                         set $template_root /usr/local/openresty/nginx/lua/templates;
 
                         # create the server based on the service

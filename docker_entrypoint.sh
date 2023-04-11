@@ -29,6 +29,8 @@ chown -R nobody /etc/resty-auto-ssl/storage
 ## Hopefully fix bug
 rm -f auto-ssl-sockproc.pid
 
+SYSTEM_RESOLVER=$(cat /etc/resolv.conf | grep -im 1 '^nameserver' | cut -d ' ' -f2)
+export SYSTEM_RESOLVER
 
 # template the nginx config, format it and test it, printing the config to stdout if there's an error
 make_config() {

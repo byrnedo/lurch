@@ -73,6 +73,7 @@ Top level options
     |`authRequestRedirect`|false   |       |Where to redirect to if auth request fails       |
     |`authRequestUpstream`|false   |       |Where to send auth requests to                   |
     |`authRequestCookie`  |false   |       |Name of cookie to take bearer token from         |
+    |`resolver`           |false   |       |DNS resolver ip                                  |
 
 `service` options
 

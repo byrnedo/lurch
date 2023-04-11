@@ -8,3 +8,4 @@ build:
 push: 
 	docker push  byrnedo/lurch:$(IMAGE_VERSION)
 
+
