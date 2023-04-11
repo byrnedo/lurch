@@ -45,7 +45,6 @@ export SYSTEM_RESOLVER
 
 # template the nginx config, format it and test it, printing the config to stdout if there's an error
 make_config() {
-  # Template nginx config
   echo "templating..."
   mv $CONF_PATH ${CONF_PATH}.old
   /usr/local/bin/gomplate -d apps="$APPS_CONFIG_PATH" --file "$TEMPLATE_PATH" --out $CONF_PATH
@@ -69,15 +68,25 @@ wait_file_changed() {
 }
 
 reload_and_wait() {
-  pid="$(cat $pidfile 2>/dev/null || echo '')"
-  if [ -z "${pid:-}" ]; then
-    return
+  # lock
+  if {
+    set -C
+    2>/dev/null >/tmp/lurchreload.lock
+  }; then
+    # have lock
+    pid="$(cat $pidfile 2>/dev/null || echo '')"
+    if [ -z "${pid:-}" ]; then
+      return
+    fi
+
+    make_config
+    echo "sending HUP..."
+    kill -HUP "$pid"
+    # release
+    rm /tmp/lurchreload.lock
+    echo "waiting on $pid"
+    wait "$pid"
   fi
-  make_config
-  echo "sending HUP..."
-  kill -HUP "$pid"
-  echo "waiting on $pid"
-  wait "$pid"
 }
 
 make_config
@@ -85,7 +94,7 @@ make_config
 echo "staring daemon..."
 /usr/local/openresty/bin/openresty -c $CONF_PATH -g "daemon off;" &
 
-trap 'echo reload signal received!; reload_and_wait' HUP
+trap 'reload_and_wait' HUP
 
 echo 'waiting for pid to appear...'
 wait_file_changed $pidfile
