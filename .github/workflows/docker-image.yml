@@ -19,5 +19,5 @@ jobs:
       - name: Run
         run: docker run --rm -d --name test -e APPS_CONFIG_PATH=/etc/lurch/test/apps.yaml -p 8090:80 byrnedo/lurch:latest
       - name: Test
-        run: docker exec -it test hurl  --test --glob '/etc/lurch/test/**/*.hurl'
+        run: docker exec test hurl  --test --glob '/etc/lurch/test/**/*.hurl'
 
