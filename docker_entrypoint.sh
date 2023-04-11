@@ -1,7 +1,6 @@
 #!/bin/sh
 set -eu
 
-
 GOMP_DIR=${GOMP_DIR:-/etc/gomplate}
 
 # the nginx configuration template
@@ -34,7 +33,6 @@ kill_child() {
 
 trap 'echo kill signal received; kill_child' INT TERM
 
-
 ## Chown storage of ssl certs
 mkdir -p /etc/resty-auto-ssl/storage
 chown -R nobody /etc/resty-auto-ssl/storage
@@ -60,8 +58,8 @@ make_config() {
   echo "testing config..."
   if ! /usr/local/openresty/bin/openresty -c $CONF_PATH -t; then
     cat --number $CONF_PATH
+    # restore prev config
     mv ${CONF_PATH}.old $CONF_PATH
-    exit 1
   fi
 }
 
@@ -71,11 +69,12 @@ wait_file_changed() {
 }
 
 reload_and_wait() {
-  make_config
   pid="$(cat $pidfile 2>/dev/null || echo '')"
   if [ -z "${pid:-}" ]; then
     return
   fi
+  make_config
+  echo "sending HUP..."
   kill -HUP "$pid"
   echo "waiting on $pid"
   wait "$pid"
