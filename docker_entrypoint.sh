@@ -23,6 +23,22 @@ if [ -n "$APPS_CONFIG_JSON" ]; then
 fi
 
 pidfile=/usr/local/openresty/nginx/logs/nginx.pid
+
+ensure_self_signed() {
+  domain=$1
+  ssl_path="/usr/local/openresty/nginx/ssl/${domain}"
+  if [ ! -d "$ssl_path" ]; then
+    echo "generating self signed cert for $domain"
+    mkdir -p $ssl_path
+    country=SE
+    state=Kalmar
+    city=Kalmar
+    # This line generates a self signed SSL certificate and key without user intervention.
+    openssl req -x509 -newkey rsa:4096 -keyout "${ssl_path}/server.key" -out "${ssl_path}/server.crt" \
+      -days 365 -nodes -subj "/C=$country/ST=$state/L=$city/O=Internet/OU=./CN=$domain/emailAddress=postmaster@$domain"
+  fi
+}
+
 kill_child() {
   pid="$(cat $pidfile 2>/dev/null || echo '')"
   if [ -n "${pid:-}" ]; then
@@ -49,6 +65,12 @@ make_config() {
   mv $CONF_PATH ${CONF_PATH}.old
   /usr/local/bin/gomplate -d apps="$APPS_CONFIG_PATH" --file "$TEMPLATE_PATH" --out $CONF_PATH
 
+  # all good, ensure self signed cert exists for base url
+  domains=$(grep "# anchor::domain" "$CONF_PATH" | awk '{print $3}' | sort -u)
+  for domain in $domains; do
+    ensure_self_signed $domain
+  done
+
   # Format it
   echo "formatting..."
   nginxfmt -v $CONF_PATH
@@ -60,6 +82,7 @@ make_config() {
     # restore prev config
     mv ${CONF_PATH}.old $CONF_PATH
   fi
+
 }
 
 # hack to wait for pid to appear

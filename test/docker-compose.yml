@@ -1,0 +1,20 @@
+version: "4"
+
+services:
+  pebble:
+    image: letsencrypt/pebble
+#    command: pebble -config /test/my-pebble-config.json
+    ports:
+      - 14000:14000  # ACME port
+      - 15000:15000  # Management port
+    environment:
+      - PEBBLE_VA_NOSLEEP=1
+#    volumes:
+#      - ./my-pebble-config.json:/test/my-pebble-config.json
+  lurch:
+    build:
+      context: ../
+    environment:
+    - APPS_CONFIG_PATH=/etc/lurch/test/apps.yaml
+    ports:
+    - "8090:80"

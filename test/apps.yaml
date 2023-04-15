@@ -2,6 +2,8 @@
 authRequestRedirect: "http://www.static.com"
 authRequestUpstream: "http://non.exis.tant"
 authRequestCookie: "sso-cookie"
+letsEncrypt:
+  endpoint: http://pebble:14000/dir
 services:
   - name: static # serves a static site from fil
     subdomains:
@@ -57,6 +59,23 @@ services:
         baseUrl: sso.com
         port: 80
         enableSso: true
+    origin:
+      type: "remote"
+      host: localhost
+      port: 80
+      headers:
+        host: www.static.com
+  - name: tls
+    subdomains:
+      - name: www
+        enabled: true
+        baseUrl: tls.com
+        enableSsl: true
+      - name: le
+        enabled: true
+        baseUrl: tls.com
+        enableSsl: true
+        enableLetsEncrypt: true
     origin:
       type: "remote"
       host: localhost
