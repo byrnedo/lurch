@@ -1,4 +1,5 @@
 ## Lurch
+![main](https://github.com/byrnedo/lurch/actions/workflows/docker-image.yml/badge.svg?branch=main)
 
 <p align="center">
     <img src="./lurch.jpg" alt="Lurch" width="200">
