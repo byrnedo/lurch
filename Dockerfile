@@ -46,7 +46,7 @@ COPY docker_entrypoint.sh /docker_entrypoint.sh
 
 RUN mkdir $RESTY_ROOT/nginx/conf.d/
 
-COPY example-apps.yaml /etc/lurch/
+COPY default-apps.yaml /etc/lurch/apps.yaml
 COPY nginx.conf.tmpl /etc/lurch/
 COPY error.html /etc/lurch/
 COPY test/ /etc/lurch/test

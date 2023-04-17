@@ -51,6 +51,8 @@ services:
       host: app.upstream.com
 ```
 
+See [test/apps.yaml](test/apps.yaml) to see examples
+
 ### Reloading
 
 Sending a SIGHUP to the container will rebuild the template and reload openresty.
