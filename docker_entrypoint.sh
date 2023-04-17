@@ -1,27 +1,26 @@
 #!/bin/bash
 set -eu
 
-GOMP_DIR=${GOMP_DIR:-/etc/gomplate}
+LURCH_DIR=${LURCH_DIR:-/etc/lurch}
 
 # the nginx configuration template
-TEMPLATE_PATH="$GOMP_DIR/nginx.conf.tmpl"
+TEMPLATE_PATH="$LURCH_DIR/nginx.conf.tmpl"
 
-# the apps json config path if local
-DEFAULT_APPS_CONFIG_PATH="$GOMP_DIR/data/apps.json"
+# the apps yaml config path if local
+DEFAULT_APPS_CONFIG_PATH="$LURCH_DIR/apps.yaml"
 
-# the user supplied apps json config path, defaults to local
+# the user supplied apps yaml config path, defaults to local
 APPS_CONFIG_PATH=${APPS_CONFIG_PATH:-${DEFAULT_APPS_CONFIG_PATH}}
 
 # the path openresty will look for the nginx config
 CONF_PATH="/usr/local/openresty/nginx/conf/nginx.conf"
 
-APPS_CONFIG_JSON=${APPS_CONFIG_JSON:-}
+APPS_CONFIG_YAML=${APPS_CONFIG_YAML:-}
 
 # If config supplied as env then write the file locally
-if [ -n "$APPS_CONFIG_JSON" ]; then
-  echo "$APPS_CONFIG_JSON" >"$DEFAULT_APPS_CONFIG_PATH"
+if [ -n "$APPS_CONFIG_YAML" ]; then
+  echo "$APPS_CONFIG_YAML" >"$DEFAULT_APPS_CONFIG_PATH"
 fi
-
 
 pidfile=/usr/local/openresty/nginx/logs/nginx.pid
 
@@ -50,7 +49,6 @@ kill_child() {
 }
 
 trap 'echo kill signal received; kill_child' INT TERM QUIT
-
 
 ## Chown storage of ssl certs
 mkdir -p /etc/resty-auto-ssl/storage
