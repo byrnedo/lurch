@@ -2,6 +2,9 @@
 authRequestRedirect: "http://www.static.com"
 authRequestUpstream: "http://non.exis.tant"
 authRequestCookie: "sso-cookie"
+#log:
+#  format: '{"timestamp": "$time_iso8601","remote_addr":"$remote_addr","message":"[$status] $request_method $request_uri","method": "$request_method","status": $status,"sent_length":$body_bytes_sent,"duration_s":$request_time,"referrer":"$http_referer","user_agent":"$http_user_agent","level": "info","proto": "$server_protocol","url": "$request_uri"}'
+#  escape: json
 letsEncrypt:
   endpoint: https://pebble:14000/dir
 services:
