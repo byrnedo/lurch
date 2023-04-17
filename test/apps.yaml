@@ -3,7 +3,7 @@ authRequestRedirect: "http://www.static.com"
 authRequestUpstream: "http://non.exis.tant"
 authRequestCookie: "sso-cookie"
 letsEncrypt:
-  endpoint: http://pebble:14000/dir
+  endpoint: https://pebble:14000/dir
 services:
   - name: static # serves a static site from fil
     subdomains:

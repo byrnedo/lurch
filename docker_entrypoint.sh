@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 GOMP_DIR=${GOMP_DIR:-/etc/gomplate}
@@ -22,6 +22,7 @@ if [ -n "$APPS_CONFIG_JSON" ]; then
   echo "$APPS_CONFIG_JSON" >"$DEFAULT_APPS_CONFIG_PATH"
 fi
 
+
 pidfile=/usr/local/openresty/nginx/logs/nginx.pid
 
 ensure_self_signed() {
@@ -44,10 +45,12 @@ kill_child() {
   if [ -n "${pid:-}" ]; then
     echo "killing child pid $pid"
     kill "$pid"
+    wait "$pid"
   fi
 }
 
-trap 'echo kill signal received; kill_child' INT TERM
+trap 'echo kill signal received; kill_child' INT TERM QUIT
+
 
 ## Chown storage of ssl certs
 mkdir -p /etc/resty-auto-ssl/storage

@@ -1,0 +1,1 @@
+CURL_OPTS="--cacert /usr/local/share/ca-certificates/pebble-minica.crt"

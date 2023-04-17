@@ -294,7 +294,7 @@
 
     init_by_lua_block {
     auto_ssl = (require "resty.auto-ssl").new()
-    {{if ( and (has $apps "letsEncrpypt") (has $apps.letsEncrypt "endpoint"))}}
+    {{if ( and (has $apps "letsEncrypt") (has $apps.letsEncrypt "endpoint"))}}
         auto_ssl:set("ca", "{{$apps.letsEncrypt.endpoint}}")
     {{end}}
 
