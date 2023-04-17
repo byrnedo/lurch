@@ -23,7 +23,7 @@ local errors_map = {
     }
 }
 
-local function getResponse(code)
+local function getVars(code)
     if errors_map[code] then
         return errors_map[code]
     else
@@ -33,7 +33,8 @@ end
 
 function _M.go(err_code)
     local template = require "resty.template"
-    template.render("error_page/error.html", { title = errors_map[err_code]["title"], message = errors_map[err_code]["message"] })
+    local vars = getVars(err_code)
+    template.render("error_page/error.html", { title = vars["title"], message = vars["message"] })
 end
 
 return _M

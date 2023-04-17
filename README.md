@@ -26,6 +26,7 @@ http, git, you name it!).
 By default the proxy expects the config file at `/etc/lurch/apps.yaml`.
 
 This can be modified with env:
+
 - APPS_CONFIG_PATH
 
 Alternatively the config can be passed directly as env with:
@@ -79,7 +80,6 @@ Top level options
     |`name`               |true    |       |The service name                                 |
     |`subdomains`         |true    |       |The subdomains for the service                   |
     |`origin`             |true    |       |The origin settings for the service            |
-
 
 `subdomain` options explained
 
@@ -176,6 +176,12 @@ services:
             host: backend.web
             port: 80
 ```
+
+## Error pages
+
+The default error page can be overridden by changing the template file:
+`/usr/local/openresty/nginx/lua/templates/error_page/error.html`
+Check [lua/error_page.lua](./lua/error_page.lua).
 
 # SSL Defaults
 
