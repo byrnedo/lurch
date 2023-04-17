@@ -48,7 +48,9 @@ RUN mkdir $RESTY_ROOT/nginx/conf.d/
 
 COPY example-apps.yaml /etc/lurch/
 COPY nginx.conf.tmpl /etc/lurch/
+COPY error.html /etc/lurch/
 COPY test/ /etc/lurch/test
+
 
 COPY lua $RESTY_ROOT/nginx/lua
 

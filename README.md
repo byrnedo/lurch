@@ -180,7 +180,8 @@ services:
 ## Error pages
 
 The default error page can be overridden by changing the template file:
-`/usr/local/openresty/nginx/lua/templates/error_page/error.html`
+`/etc/lurch/error.html`.
+Note that the syntax in error.html is for [resty.template](https://github.com/bungle/lua-resty-template#template-syntax), not golang templating
 Check [lua/error_page.lua](./lua/error_page.lua).
 
 # SSL Defaults

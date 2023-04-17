@@ -31,10 +31,14 @@ local function getVars(code)
     end
 end
 
+local template = require "resty.template".new({
+    root     = "/etc/lurch",
+    location = "/etc/lurch"
+})
+
 function _M.go(err_code)
-    local template = require "resty.template"
     local vars = getVars(err_code)
-    template.render("error_page/error.html", { title = vars["title"], message = vars["message"] })
+    template.render("error.html", { title = vars["title"], message = vars["message"] })
 end
 
 return _M
