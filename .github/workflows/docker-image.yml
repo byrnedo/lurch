@@ -14,11 +14,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag byrnedo/lurch:latest
       - name: Run
-        run: docker run --rm -d --name test -e APPS_CONFIG_PATH=/etc/lurch/test/apps.yaml -p 8090:80 byrnedo/lurch:latest
-      - run: sleep 5
+        run: cd test && docker compose up --build -d
+      - run: sleep 10
       - name: Test
-        run: docker exec test hurl  --test --glob '/etc/lurch/test/**/*.hurl'
+        run: cd test && docker compose exec lurch hurl  --test --glob '/etc/lurch/test/**/*.hurl'
+
 

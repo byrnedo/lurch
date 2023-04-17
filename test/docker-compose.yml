@@ -1,0 +1,28 @@
+version: "4"
+
+services:
+  pebble:
+    image: letsencrypt/pebble
+    #    command: pebble -config /test/my-pebble-config.json
+    ports:
+      - 14000:14000  # ACME port
+      - 15000:15000  # Management port
+    environment:
+      - PEBBLE_VA_NOSLEEP=1
+      - PEBBLE_VA_ALWAYS_VALID=1
+
+  lurch:
+    build:
+      context: ../
+    environment:
+      - APPS_CONFIG_PATH=/etc/lurch/test/apps.yaml
+    networks:
+      default:
+        aliases:
+          - "le.tls.com"
+    volumes:
+      - "./pebble-minica.crt:/usr/local/share/ca-certificates/pebble-minica.crt"
+      - "./dehydrated-conf.sh:/etc/resty-auto-ssl/letsencrypt/conf.d/custom.sh"
+    ports:
+      - "8090:80"
+      - "8093:443"
