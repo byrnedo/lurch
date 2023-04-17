@@ -46,9 +46,9 @@ COPY docker_entrypoint.sh /docker_entrypoint.sh
 
 RUN mkdir $RESTY_ROOT/nginx/conf.d/
 
-COPY data /etc/gomplate/data
-COPY nginx.conf.tmpl /etc/gomplate/nginx.conf.tmpl
-COPY test /etc/lurch/test
+COPY example-apps.yaml /etc/lurch/
+COPY nginx.conf.tmpl /etc/lurch/
+COPY test /etc/lurch/
 
 COPY lua $RESTY_ROOT/nginx/lua
 

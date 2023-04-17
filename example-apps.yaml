@@ -1,0 +1,21 @@
+---
+authRequestUpstream: https://auth.com
+authRequestRedirect: https://login.com
+authRequestCookie: mycookie
+services:
+  - name: an-upstream
+    subdomains:
+      - name: sub1
+        enabled: 'true'
+        baseUrl: foo.bar
+        enableSso: true
+        port: 80
+      - name: sub2
+        enabled: 'true'
+        baseUrl: foo.bar2
+        enableSso: false
+        port: 80
+    origin:
+      type: remote
+      port: 9000
+      host: an.upstream.com

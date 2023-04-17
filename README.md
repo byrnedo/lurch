@@ -1,4 +1,5 @@
 ## Lurch
+
 ![main](https://github.com/byrnedo/lurch/actions/workflows/docker-image.yml/badge.svg?branch=main)
 
 <p align="center">
@@ -17,48 +18,43 @@ Docker image available on [docker hub](https://hub.docker.com/r/byrnedo/lurch).
 
 ### Config
 
-The nginx config is generated from the json structure using [Gomplate.](https://docs.gomplate.ca)
+The nginx config is generated from the yaml structure using [Gomplate.](https://docs.gomplate.ca)
 
 Gomplate supports many kinds of [datasources](https://docs.gomplate.ca/datasources/) ( local file, remote file over
 http, git, you name it!).
 
-By default the proxy expects the json file at `/etc/gomplate/data/apps.json`.
+By default the proxy expects the config file at `/etc/lurch/apps.yaml`.
+
+This can be modified with env:
+- APPS_CONFIG_PATH
 
 Alternatively the config can be passed directly as env with:
 
-- APPS_CONFIG_JSON
+- APPS_CONFIG_YAML
 
 The config looks like this:
 
-```json
- {
-  "services": [
-    {
-      "name": "my-service",
-      "subdomains": [
-        {
-          "name": "www",
-          "enabled": "true",
-          "enableClientCerts": false,
-          "enableSsl": true,
-          "baseUrl": "local.foo.bar"
-        }
-      ],
-      "origin": {
-        "type": "remote",
-        "port": 9111,
-        "host": "app.upstream.com"
-      }
-    }
-  ]
-}
+```yaml
+---
+services:
+  - name: my-service
+    subdomains:
+      - name: www
+        enabled: 'true'
+        enableClientCerts: false
+        enableSsl: true
+        baseUrl: local.foo.bar
+    origin:
+      type: remote
+      port: 9111
+      host: app.upstream.com
 ```
 
 ### Reloading
 
 Sending a SIGHUP to the container will rebuild the template and reload openresty.
 
-### JSON Spec
+### YAML Spec
 
 **An app can have multiple subdomains**
 
@@ -82,7 +78,8 @@ Top level options
     |----------------------------------------------------------------------------------------|
     |`name`               |true    |       |The service name                                 |
     |`subdomains`         |true    |       |The subdomains for the service                   |
-    |`origin`           |true    |       |The origin settings for the service            |
+    |`origin`             |true    |       |The origin settings for the service            |
+
 
 `subdomain` options explained
 
@@ -124,19 +121,16 @@ If `origin.type = "local"`
     |`stripPath`           |false   |       |Strip the `path` value when proxying requests   |
     |`origin`              |true    |       |Origin object                                   |
 
-Example json:
+Example yaml:
 
-```json
-{
-  "type": "prefix",
-  "path": "/api/",
-  "stripPath": true,
-  "origin": {
-    "type": "remote",
-    "host": "nginx-api.web",
-    "port": 80
-  }
-}
+```yaml
+type: prefix
+path: "/api/"
+stripPath: true
+origin:
+  type: remote
+  host: nginx-api.web
+  port: 80
 ```
 
 `errorPages` options explained
@@ -144,12 +138,9 @@ Example json:
 This is an object where keys are the http status code.
 Each status code key value is an object with one property `file`.
 
-```json
-{
-  "404": {
-    "file": "404.html"
-  }
-}
+```yaml
+'404':
+  file: 404.html
 ```
 
 NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the base-url is set to.
@@ -158,55 +149,39 @@ NOTE: A subdomain of 'www' also will be available at 'foo.bar' or whatever the b
 
 ### Static Site Which Proxies /api to Upstream
 
-```json
-{
-  "services": [
-    {
-      "name": "static",
-      "subdomains": [
-        {
-          "name": "static",
-          "enabled": "true",
-          "baseUrl": "test.com",
-          "enableSsl": false,
-          "port": 80
-        }
-      ],
-      "origin": {
-        "type": "local",
-        "root": "/data/static/html",
-        "fallbacks": [
-          "/index.html;"
-        ],
-        "errorPages": {
-          "404": {
-            "file": "/404.html"
-          }
-        },
-        "pathRules": [
-          {
-            "type": "prefix",
-            "path": "/api/",
-            "stripPath": true,
-            "origin": {
-              "type": "remote",
-              "host": "backend.web",
-              "port": 80
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
+```yaml
+---
+services:
+  - name: static
+    subdomains:
+      - name: static
+        enabled: 'true'
+        baseUrl: test.com
+        enableSsl: false
+        port: 80
+    origin:
+      type: local
+      root: "/data/static/html"
+      fallbacks:
+        - "/index.html;"
+      errorPages:
+        '404':
+          file: "/404.html"
+      pathRules:
+        - type: prefix
+          path: "/api/"
+          stripPath: true
+          origin:
+            type: remote
+            host: backend.web
+            port: 80
 ```
 
 # SSL Defaults
 
-A default certificate needs to be supplied, even when using letsencrypt.
+A default certificate needs to be supplied, even when using letsencrypt (in case issuance fails).
 
-These must be named `server.crt` and placed in `/usr/local/openresty/nginx/ssl/<baseUrl>/`.
-
-So generate a self-signed one for worst case and mount it in :)
+Lurch generates a self-signed one for you automatically, but should you need to add your own, lurch expects
+a `server.crt` and `server.key` and placed in `/usr/local/openresty/nginx/ssl/<baseUrl>/`.
 
 FYI: A `subdomain` with no `port` will default to 443
