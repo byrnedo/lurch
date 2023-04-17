@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run
-        run: cd test && docker compose up --build
+        run: cd test && docker compose up --build -d
       - run: sleep 10
       - name: Test
         run: cd test && docker compose exec lurch hurl  --test --glob '/etc/lurch/test/**/*.hurl'
