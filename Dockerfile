@@ -16,6 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     curl \
     unzip \
     make \
+    bsdmainutils \
     python3 && \
     rm -rf /var/lib/apt/lists/* && \
     curl -L https://luarocks.org/releases/luarocks-2.0.13.tar.gz --output /tmp/luarocks-2.0.13.tar.gz && \
@@ -37,7 +38,9 @@ RUN DEBIAN_FRONTEND=noninteractive \
     mkdir /etc/resty-auto-ssl && \
     chown nobody /etc/resty-auto-ssl && \
     curl -L https://raw.githubusercontent.com/slomkowski/nginx-config-formatter/master/nginxfmt.py > /usr/local/bin/nginxfmt && \
-    chmod +x /usr/local/bin/nginxfmt
+    chmod +x /usr/local/bin/nginxfmt && \
+    curl -L https://raw.githubusercontent.com/dehydrated-io/dehydrated/v0.7.1/dehydrated > /usr/local/openresty/luajit/bin/resty-auto-ssl/dehydrated && \
+    chmod +x /usr/local/openresty/luajit/bin/resty-auto-ssl/dehydrated
 
 COPY docker_entrypoint.sh /docker_entrypoint.sh
 

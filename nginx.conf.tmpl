@@ -109,15 +109,19 @@
     {{if (has . "enableSsl")}}
         {{ if .enableSsl}}
 
+            # anchor::domain {{.baseUrl}}
+
             ssl_certificate_by_lua_block {
             auto_ssl:ssl_certificate()
             }
             {{template "sslSettings"}}
-            ssl_certificate "/usr/local/openresty/nginx/ssl/{{.baseUrl}}/server.crt";
-            ssl_certificate_key "/usr/local/openresty/nginx/ssl/{{.baseUrl}}/server.key";
+            {{$sslPath := "/usr/local/openresty/nginx/ssl/"}}
+            # fallback certs
+            ssl_certificate "{{$sslPath}}{{.baseUrl}}/server.crt";
+            ssl_certificate_key "{{$sslPath}}{{.baseUrl}}/server.key";
             {{/*Turn on client ssl??*/}}
-            {{if .enableClientCerts }}
-                ssl_client_certificate "/usr/local/openresty/nginx/ssl/{{.baseUrl}}/client/ca.crt";
+            {{if index . "enableClientCerts" }}
+                ssl_client_certificate "{{$sslPath}}{{.baseUrl}}/client/ca.crt";
                 ssl_verify_client on;
                 ssl_verify_depth 2;
             {{end}}
@@ -209,6 +213,9 @@
 
 
 {{with $apps := datasource "apps"}}
+    {{if has $apps "baseUrl"}}
+        # anchor::domain {{$apps.baseUrl}}
+    {{end}}
 
     events {
     worker_connections  {{if (has $apps "workerConnections") }}{{$apps.workerConnections}}{{else}}1024{{end}};
@@ -287,6 +294,9 @@
 
     init_by_lua_block {
     auto_ssl = (require "resty.auto-ssl").new()
+    {{if ( and (has $apps "letsEncrypt") (has $apps.letsEncrypt "endpoint"))}}
+        auto_ssl:set("ca", "{{$apps.letsEncrypt.endpoint}}")
+    {{end}}
 
     -- Define a function to determine which SNI domains to automatically handle
     -- and register new certificates for. Defaults to not allowing any domains,
