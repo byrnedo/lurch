@@ -43,7 +43,7 @@ kill_child() {
   pid="$(cat $pidfile 2>/dev/null || echo '')"
   if [ -n "${pid:-}" ]; then
     echo "killing child pid $pid"
-    kill "$pid"
+    kill -QUIT "$pid"
     wait "$pid"
   fi
 }

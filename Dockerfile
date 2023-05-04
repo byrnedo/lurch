@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 openresty/openresty:1.21.4.1-6-bullseye-fat
+ARG IMAGE=${IMAGE:-openresty/openresty:1.21.4.1-6-bullseye-fat}
+FROM ${IMAGE}
 MAINTAINER Donal Byrne <byrnedo@tcd.ie>
 
 ENV RESTY_AUTO_SSL_VERSION=0.13.1
@@ -8,8 +9,8 @@ ENV RESTY_ROOT=/usr/local/openresty
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && \
-    curl --location https://github.com/Orange-OpenSource/hurl/releases/download/${HURL_VERSION}/hurl_${HURL_VERSION}_$(dpkg --print-architecture).deb --output "/tmp/hurl.deb" && \
-    DEBIAN_FRONTEND=noninteractive apt install -y /tmp/hurl.deb && \
+    #curl --location https://github.com/Orange-OpenSource/hurl/releases/download/${HURL_VERSION}/hurl_${HURL_VERSION}_$(dpkg --print-architecture).deb --output "/tmp/hurl.deb" && \
+    #DEBIAN_FRONTEND=noninteractive apt install -y /tmp/hurl.deb && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     build-essential \
@@ -32,7 +33,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-http && \
     DEBIAN_FRONTEND=noninteractive /usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl $RESTY_AUTO_SSL_VERSION && \
     opm get bungle/lua-resty-template && \
-    curl -L https://github.com/hairyhenderson/gomplate/releases/download/$GOMPLATE_VERSION/gomplate_linux-$(dpkg --print-architecture) > /tmp/gomplate && \
+    curl -L https://github.com/hairyhenderson/gomplate/releases/download/$GOMPLATE_VERSION/gomplate_linux-$(dpkg --print-architecture|sed 's/armhf/armv7/') > /tmp/gomplate && \
     mv /tmp/gomplate /usr/local/bin && \
     chmod +x /usr/local/bin/gomplate && \
     mkdir /etc/resty-auto-ssl && \
@@ -56,4 +57,3 @@ COPY lua $RESTY_ROOT/nginx/lua
 
 
 ENTRYPOINT ["/docker_entrypoint.sh"]
-
