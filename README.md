@@ -63,17 +63,18 @@ Sending a SIGHUP to the container will rebuild the template and reload openresty
 
 Top level options
 
-    |Service options      |Required|Default|Description                                      |
-    |----------------------------------------------------------------------------------------|
-    |`workerConnections`  |false   |   1024|No of worker connections                         |
-    |`proxyReadTimeout`   |false   |    120|Read timeout to upstream                         |
-    |`proxySendTimeout`   |false   |    120|Send timeout to upstream                         |
-    |`sendTimeout`        |false   |    120|Send timeout                                     |
-    |`readTimeout`        |false   |    120|Read timeout                                     |
-    |`authRequestRedirect`|false   |       |Where to redirect to if auth request fails       |
-    |`authRequestUpstream`|false   |       |Where to send auth requests to                   |
-    |`authRequestCookie`  |false   |       |Name of cookie to take bearer token from         |
-    |`resolver`           |false   |       |DNS resolver ip                                  |
+
+| Service options      |Required|Default|Description                                      |
+| --------------------------------------------------------------------------------------- |
+| `workerConnections`  |false   |   1024|No of worker connections                         |
+| `proxyReadTimeout`   |false   |    120|Read timeout to upstream                         |
+| `proxySendTimeout`   |false   |    120|Send timeout to upstream                         |
+| `sendTimeout`        |false   |    120|Send timeout                                     |
+|`readTimeout`        |false   |    120|Read timeout                                      |
+| `authRequestRedirect`|false   |       |Where to redirect to if auth request fails       |
+| `authRequestUpstream`|false   |       |Where to send auth requests to                   |
+| `authRequestCookie`  |false   |       |Name of cookie to take bearer token from         |
+| `resolver`           |false   |       |DNS resolver ip                                  |
 
 `service` options
 

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-docker build --platform linux/arm/v7 -f Dockerfile.openresty-armv7 -t openresty-armv7 .
+podman build --platform linux/arm/v7 -f Dockerfile.openresty-armv7 -t openresty-armv7 .
 
-docker build --platform linux/arm/v7 -t lurch --build-arg IMAGE=openresty-armv7 .
+podman build --platform linux/arm/v7 -t lurch --build-arg IMAGE=openresty-armv7 .
