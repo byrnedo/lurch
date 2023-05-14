@@ -7,10 +7,11 @@ ENV GOMPLATE_VERSION=v3.11.2
 ENV HURL_VERSION=2.0.1
 ENV RESTY_ROOT=/usr/local/openresty
 
+
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update -qq && \
-    #curl --location https://github.com/Orange-OpenSource/hurl/releases/download/${HURL_VERSION}/hurl_${HURL_VERSION}_$(dpkg --print-architecture).deb --output "/tmp/hurl.deb" && \
-    #DEBIAN_FRONTEND=noninteractive apt install -y /tmp/hurl.deb && \
+    ( curl -f --location https://github.com/Orange-OpenSource/hurl/releases/download/${HURL_VERSION}/hurl_${HURL_VERSION}_$(dpkg --print-architecture).deb --output "/tmp/hurl.deb" && \
+    DEBIAN_FRONTEND=noninteractive apt install -y /tmp/hurl.deb) || true && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
     build-essential \
