@@ -63,66 +63,72 @@ Sending a SIGHUP to the container will rebuild the template and reload openresty
 
 Top level options
 
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
 
-| Service options      |Required|Default|Description                                      |
-| --------------------------------------------------------------------------------------- |
-| `workerConnections`  |false   |   1024|No of worker connections                         |
-| `proxyReadTimeout`   |false   |    120|Read timeout to upstream                         |
-| `proxySendTimeout`   |false   |    120|Send timeout to upstream                         |
-| `sendTimeout`        |false   |    120|Send timeout                                     |
-| `readTimeout`        |false   |    120|Read timeout                                      |
-| `authRequestRedirect`|false   |       |Where to redirect to if auth request fails       |
-| `authRequestUpstream`|false   |       |Where to send auth requests to                   |
-| `authRequestCookie`  |false   |       |Name of cookie to take bearer token from         |
-| `resolver`           |false   |       |DNS resolver ip                                  |
+
+| Service options        | Required | Default | Description                                |
+|------------------------|----------|---------|--------------------------------------------|
+| `workerConnections`    | false   |   1024   | No of worker connections                   |
+| `proxyReadTimeout`     | false   |    120   | Read timeout to upstream                   |
+| `proxySendTimeout`     | false   |    120   | Send timeout to upstream                   |
+| `sendTimeout`          | false   |    120   | Send timeout                               |
+| `readTimeout`          | false   |    120   | Read timeout                               |
+| `authRequestRedirect`  | false   |          | Where to redirect to if auth request fails |
+| `authRequestUpstream`  | false   |          | Where to send auth requests to             |
+| `authRequestCookie`    | false   |          | Name of cookie to take bearer token from   |
+| `letsEncrypt.endpoint` | false   |          | Endpoint for letsencrypt                   |
+| `resolver`             | false   |          | DNS resolver ip                            |
 
 `service` options
 
-    |Service options      |Required|Default|Description                                      |
-    |----------------------------------------------------------------------------------------|
-    |`name`               |true    |       |The service name                                 |
-    |`subdomains`         |true    |       |The subdomains for the service                   |
-    |`origin`             |true    |       |The origin settings for the service            |
+|Service options      |Required|Default|Description                                      |
+|---------------------|--------|-------|-------------------------------------------------|
+|`name`               |true    |       |The service name                                 |
+|`subdomains`         |true    |       |The subdomains for the service                   |
+|`origin`             |true    |       |The origin settings for the service            |
 
 `subdomain` options explained
 
-    |Subdomain options    |Required|Default|Description                                      |
-    |----------------------------------------------------------------------------------------|
-    |`name`               |true    |       |The subdommain                                   |
-    |`enabled`            |true    |       |Whether or not the domain is visible             |
-    |`enableSsl`          |true    |       |Whether or not to apply ssl server side          |
-    |`enableLetsEncrypt`  |false   |false  |Whether or not to apply auto ssl                 |
-    |`enableSso`          |false   |false  |Whether or not to shield with single-sign-on     |
-    |`enableClientCerts`  |true    |       |Whether or not to require client ssl cert as well|
-    |`baseUrl`            |true    |       |Base domain for the sub domain                   |
-    |`port`               |false   |443    |The port to listen on publicly for this domain   |
-    |`clientMaxBodySize`  |false   |20m    |Max upload body size                             |
+|Subdomain options    |Required|Default|Description                                      |
+|---------------------|--------|-------|-------------------------------------------------|
+|`name`               |true    |       |The subdommain                                   |
+|`enabled`            |true    |       |Whether or not the domain is visible             |
+|`enableSsl`          |true    |       |Whether or not to apply ssl server side          |
+|`enableLetsEncrypt`  |false   |false  |Whether or not to apply auto ssl                 |
+|`enableSso`          |false   |false  |Whether or not to shield with single-sign-on     |
+|`enableClientCerts`  |true    |       |Whether or not to require client ssl cert as well|
+|`baseUrl`            |true    |       |Base domain for the sub domain                   |
+|`port`               |false   |443    |The port to listen on publicly for this domain   |
+|`clientMaxBodySize`  |false   |20m    |Max upload body size                             |
 
 `origin` options
 
 If `origin.type = "remote"`
 
-    |Remote options      |Required|Default|Description                                     |
-    |--------------------------------------------------------------------------------------|
-    |`host`              |true    |       |The host to proxy to                            |
-    |`port`              |true    |       |The port to proxy to                            |
+|Remote options      |Required|Default|Description                                     |
+|--------------------|--------|-------|------------------------------------------------|
+|`host`              |true    |       |The host to proxy to                            |
+|`port`              |true    |       |The port to proxy to                            |
 
 If `origin.type = "local"`
 
-    |Local options      |Required|Default|Description                                     |
-    |-------------------------------------------------------------------------------------|
-    |`root`             |true    |       |The root dir where the files are hosted         |  
-    |`errorPages`       |false   |       |Error pages config                              |
-    |`pathRules`        |false   |       |Array of pathRules                              |
+|Local options      |Required|Default|Description                                     |
+|-------------------|--------|-------|------------------------------------------------|
+|`root`             |true    |       |The root dir where the files are hosted         |  
+|`errorPages`       |false   |       |Error pages config                              |
+|`pathRules`        |false   |       |Array of pathRules                              |
 
 `pathRules` options explained
 
-    |Path Rules options    |Required|Default|Description                                     |
-    |----------------------------------------------------------------------------------------|
-    |`type`                |true    |       |One of [ prefix ]                               |
-    |`path`                |true    |       |The url path to apply the rule to               |
-    |`stripPath`           |false   |       |Strip the `path` value when proxying requests   |
-    |`origin`              |true    |       |Origin object                                   |
+|Path Rules options    |Required|Default|Description                                     |
+|----------------------|--------|-------|------------------------------------------------|
+|`type`                |true    |       |One of [ prefix ]                               |
+|`path`                |true    |       |The url path to apply the rule to               |
+|`stripPath`           |false   |       |Strip the `path` value when proxying requests   |
+|`origin`              |true    |       |Origin object                                   |
 
 Example yaml:
 
