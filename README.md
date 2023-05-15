@@ -63,11 +63,6 @@ Sending a SIGHUP to the container will rebuild the template and reload openresty
 
 Top level options
 
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
-
 
 | Service options        | Required | Default | Description                                |
 |------------------------|----------|---------|--------------------------------------------|
